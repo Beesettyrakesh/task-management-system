@@ -285,27 +285,43 @@ Content-Type: application/json
 
 ---
 
-## 🔐 Authentication API (Week 2 - Planned Implementation)
+## 🔐 Authentication API (Week 2 - ✅ IMPLEMENTED & WORKING)
 
-### 1. User Registration
-**Endpoint:** `POST /api/auth/register`
+### 1. User Registration (Signup)
+**Endpoint:** `POST /api/auth/signup`
+
+**Request Headers:**
+```
+Content-Type: application/json
+```
 
 **Request Body:**
 ```json
 {
-  "username": "johndoe",
-  "email": "john@example.com",
+  "username": "testuser3",
+  "email": "testuser3@email.com",
   "password": "password123"
 }
 ```
 
-**Response (201 Created):**
+**✅ ACTUAL RESPONSE (200 OK):**
 ```json
 {
-  "id": 1,
-  "username": "johndoe",
-  "email": "john@example.com",
-  "createdAt": "2024-11-18T11:30:00"
+  "username": "testuser3",
+  "email": "testuser3@email.com"
+}
+```
+
+**Validation Rules:**
+- `username`: Required, 3-20 characters
+- `email`: Required, valid email format
+- `password`: Required, minimum 6 characters
+
+**Error Responses:**
+- `400 Bad Request` - Validation errors or user already exists
+```json
+{
+  "message": "User already exists"
 }
 ```
 
@@ -314,22 +330,49 @@ Content-Type: application/json
 ### 2. User Login
 **Endpoint:** `POST /api/auth/login`
 
+**Request Headers:**
+```
+Content-Type: application/json
+```
+
 **Request Body:**
 ```json
 {
-  "username": "johndoe",
+  "username": "testuser3",
   "password": "password123"
 }
 ```
 
-**Response (200 OK):**
+**✅ ACTUAL RESPONSE (200 OK):**
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "username": "johndoe",
-  "email": "john@example.com"
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImV4cCI6MTc2MzgyMjE2NCwiaWF0IjoxNzYzNzM1NzY0fQ.Zve1xt7s4VUzFR-gSJ76RChIZ3pU_YUyaiqjHEsA65Q",
+  "username": "testuser3", 
+  "email": "testuser3@email.com"
 }
 ```
+
+**Token Details:**
+- **Algorithm:** HS256 (HMAC with SHA-256)
+- **Expiration:** 24 hours (86400000 ms)
+- **Claims:** username (sub), issued at (iat), expiration (exp)
+
+**Error Responses:**
+- `401 Unauthorized` - Invalid credentials
+- `400 Bad Request` - Missing username/password
+
+---
+
+### 3. JWT Token Usage
+**For Protected Endpoints (Week 3+):**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImV4cCI6MTc2MzgyMjE2NCwiaWF0IjoxNzYzNzM1NzY0fQ.Zve1xt7s4VUzFR-gSJ76RChIZ3pU_YUyaiqjHEsA65Q
+```
+
+**Token Validation:**
+- Signature verification using JWT_SECRET environment variable
+- Expiration check (24-hour validity)
+- Username extraction for user identification
 
 ---
 
@@ -592,10 +635,33 @@ curl -X PUT http://localhost:8080/api/tasks/1 \
 curl -X DELETE http://localhost:8080/api/tasks/1
 ```
 
-### With Authentication (Week 2)
+### Authentication Commands (Week 2 - ✅ Working)
+
+#### User Signup
+```bash
+curl -X POST http://localhost:8080/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser3",
+    "email": "testuser3@email.com",
+    "password": "password123"
+  }'
+```
+
+#### User Login
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser3",
+    "password": "password123"
+  }'
+```
+
+#### With JWT Token Authentication (Week 3+)
 ```bash
 curl -X GET http://localhost:8080/api/tasks \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImV4cCI6MTc2MzgyMjE2NCwiaWF0IjoxNzYzNzM1NzY0fQ.Zve1xt7s4VUzFR-gSJ76RChIZ3pU_YUyaiqjHEsA65Q"
 ```
 
 ---

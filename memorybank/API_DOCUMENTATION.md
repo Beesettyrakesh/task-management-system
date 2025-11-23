@@ -447,36 +447,60 @@ Authorization: Bearer <jwt_token>
 
 ## 🔒 Authentication Flow
 
-### JWT Token Usage (Week 2)
+### JWT Token Usage (Week 2-3 - ✅ IMPLEMENTED)
 
-#### 1. Login Process
+#### 1. Registration & Login Process
 ```
-POST /api/auth/login
+POST /api/auth/signup (Create account)
 ↓
-Receive JWT token
+POST /api/auth/login (Get JWT token)
 ↓
-Store token in localStorage/cookies
+Store token in localStorage/sessionStorage
 ↓
-Include in subsequent requests
-```
-
-#### 2. Protected Endpoint Access
-```
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Include token in Authorization header for protected endpoints
 ```
 
-#### 3. Token Validation Flow
+#### 2. Protected Endpoint Access (Day 12 ✅)
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImV4cCI6MTc2MzgyMjE2NCwiaWF0IjoxNzYzNzM1NzY0fQ.Zve1xt7s4VUzFR-gSJ76RChIZ3pU_YUyaiqjHEsA65Q
+```
+
+**✅ All Task Endpoints Now Protected:**
+- All `/api/tasks/**` endpoints require valid JWT token
+- Missing/invalid tokens return `401 Unauthorized`
+- Expired tokens are rejected gracefully
+
+#### 3. JWT Middleware Validation Flow (Day 12 ✅)
 ```
 Client Request with JWT
 ↓
-JwtAuthenticationFilter extracts token
+JwtAuthenticationFilter intercepts request
 ↓
-Validate token signature and expiration
+Extract Authorization header & validate Bearer format
 ↓
-Set authentication in SecurityContext
+Parse JWT token and extract username
 ↓
-Allow access to protected resource
+Load user from database via UserRepository
+↓
+Validate token signature and expiration (JwtUtil.validateToken)
+↓
+Set Authentication in SecurityContext
+↓
+Continue to controller (protected resource access granted)
 ```
+
+#### 4. Error Handling Flow
+```
+Invalid/Missing JWT Token
+↓
+JwtAuthenticationFilter detects issue
+↓
+Skip authentication setup
+↓
+Continue filter chain
+↓
+Spring Security blocks access (401 Unauthorized)
+
 
 ---
 
@@ -862,8 +886,27 @@ public List<Task> getUserTasks(Long userId) {
 
 ---
 
-**Last Updated:** November 18, 2024 - Week 1, Day 7  
-**API Version:** v1.0.0  
+**Last Updated:** November 23, 2024 - Week 3, Day 12  
+**API Version:** v2.0.0 (JWT Middleware Complete)
 **Spring Boot Version:** 3.5.7  
 
 *This documentation serves as your complete API reference and will be updated as new features are implemented throughout the 42-day development plan.*
+
+---
+
+## 🔐 Day 12 JWT Middleware Update Summary
+
+### ✅ **New Security Features Documented:**
+- **JWT Authentication Middleware** - Complete request validation flow
+- **Protected Endpoints** - All task endpoints now require JWT authentication  
+- **Enhanced Authentication Flow** - Updated with middleware validation steps
+- **Error Handling** - 401 Unauthorized responses for invalid tokens
+- **Updated curl Commands** - JWT Bearer token examples
+
+### ✅ **Production-Ready Security Stack:**
+- **JwtAuthenticationFilter** - OncePerRequestFilter implementation
+- **Stateless Session Management** - Complete JWT-based authentication
+- **Robust Token Validation** - Signature, expiration, and user verification
+- **Graceful Error Handling** - No 500 errors, clean 401 responses
+
+*Your Task Management API now has enterprise-grade JWT authentication middleware protecting all endpoints!*

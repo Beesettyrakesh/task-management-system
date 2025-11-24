@@ -5,12 +5,14 @@ import com.rakesh.taskmanagement.dto.LoginResponseDto;
 import com.rakesh.taskmanagement.dto.SignupRequestDto;
 import com.rakesh.taskmanagement.dto.SignupResponseDto;
 import com.rakesh.taskmanagement.entity.User;
+import com.rakesh.taskmanagement.exception.ResourceNotFoundException;
 import com.rakesh.taskmanagement.repository.UserRepository;
 import com.rakesh.taskmanagement.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,14 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
 
     public SignupResponseDto signup(SignupRequestDto signupRequestDto) {
         if(userRepository.existsByUsername(signupRequestDto.getUsername())) {

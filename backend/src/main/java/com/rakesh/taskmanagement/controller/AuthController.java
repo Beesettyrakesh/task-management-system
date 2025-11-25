@@ -1,12 +1,10 @@
 package com.rakesh.taskmanagement.controller;
 
 import com.rakesh.taskmanagement.dto.*;
-import com.rakesh.taskmanagement.entity.User;
 import com.rakesh.taskmanagement.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

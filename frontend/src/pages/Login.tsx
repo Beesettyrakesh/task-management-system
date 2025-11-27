@@ -1,15 +1,21 @@
 import { useAuth } from "../hooks/useAuth";
 import { LoginFormData } from "@/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import Layout from "../components/Layout";
 
 function Login() {
-  const { login, authLoading } = useAuth();
+  const { login, authLoading, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const [loginError, setLoginError] = useState<string>("");
 
+  useEffect(() => {
+    if(!loading && isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate]);
+  
   const {
     register,
     handleSubmit,
@@ -36,9 +42,6 @@ function Login() {
         <div className="max-w-md w-full space-y-8">
           {/* Header */}
           <div className="text-center">
-            <div className="mx-auto h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-white font-bold text-xl">T</span>
-            </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               Welcome back
             </h2>

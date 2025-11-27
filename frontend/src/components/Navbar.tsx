@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 const Navbar: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -10,7 +10,7 @@ const Navbar: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
     setShowLogoutConfirm(false);
   };
 
@@ -21,11 +21,16 @@ const Navbar: React.FC = () => {
           <div className="flex justify-between h-16">
             {/* Logo and Brand */}
             <div className="flex items-center">
-              <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center space-x-2">
+              <Link
+                to={isAuthenticated ? "/dashboard" : "/"}
+                className="flex items-center space-x-2"
+              >
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">T</span>
                 </div>
-                <span className="text-xl font-bold text-gray-900">TaskManager</span>
+                <span className="text-xl font-bold text-gray-900">
+                  TaskManager
+                </span>
               </Link>
             </div>
 
@@ -39,7 +44,7 @@ const Navbar: React.FC = () => {
                   >
                     Dashboard
                   </Link>
-                  
+
                   {/* User Menu */}
                   <div className="relative">
                     <button
@@ -51,12 +56,19 @@ const Navbar: React.FC = () => {
                       </div>
                       <span>{user?.username}</span>
                       <svg
-                        className={`w-4 h-4 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`}
+                        className={`w-4 h-4 transition-transform ${
+                          isMenuOpen ? "rotate-180" : ""
+                        }`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
                       </svg>
                     </button>
 
@@ -64,7 +76,9 @@ const Navbar: React.FC = () => {
                     {isMenuOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
                         <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900">{user?.username}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {user?.username}
+                          </p>
                           <p className="text-sm text-gray-500">{user?.email}</p>
                         </div>
                         <button
@@ -104,11 +118,26 @@ const Navbar: React.FC = () => {
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="text-gray-700 hover:text-blue-600 p-2"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   {isMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   )}
                 </svg>
               </button>
@@ -122,7 +151,9 @@ const Navbar: React.FC = () => {
                 {isAuthenticated ? (
                   <>
                     <div className="px-3 py-2 border-b border-gray-100 mb-2">
-                      <p className="text-sm font-medium text-gray-900">{user?.username}</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {user?.username}
+                      </p>
                       <p className="text-sm text-gray-500">{user?.email}</p>
                     </div>
                     <Link

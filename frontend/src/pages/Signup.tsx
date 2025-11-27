@@ -39,9 +39,6 @@ const Signup: React.FC = () => {
         <div className="max-w-md w-full space-y-8">
           {/* Header */}
           <div className="text-center">
-            <div className="mx-auto h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-white font-bold text-xl">T</span>
-            </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               Create your account
             </h2>

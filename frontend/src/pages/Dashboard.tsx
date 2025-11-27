@@ -3,7 +3,7 @@ import Layout from "../components/Layout";
 import { useAuth } from "../hooks/useAuth";
 
 const Dashboard: React.FC = () => {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user } = useAuth();
 
   const currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -23,7 +23,7 @@ const Dashboard: React.FC = () => {
         {/* Header Section */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Welcome back, {user?.username}! 👋
+            Welcome back, {user?.username}!
           </h1>
           <p className="text-lg text-gray-600">
             {currentDate} • {currentTime}

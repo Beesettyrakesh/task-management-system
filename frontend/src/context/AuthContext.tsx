@@ -6,6 +6,7 @@ import {
   User,
 } from "@/types";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
+import toast from 'react-hot-toast';
 import API from "../services/api";
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -29,18 +30,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (savedToken) {
         try {
           setToken(savedToken);
-          API.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
 
           const response = await API.get<User>("/auth/me");
           setUser(response.data);
 
-          console.log("Token verified:", savedToken);
-          console.log("User data:", response.data);
           console.log("Token verified successfully:", response.data);
         } catch (error) {
           console.log("Token verification failed");
           localStorage.removeItem("token");
-          delete API.defaults.headers.common["Authorization"];
           setToken("");
           setUser(null);
         }
@@ -53,13 +50,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       localStorage.setItem("token", token);
     } else {
-      delete API.defaults.headers.common["Authorization"];
       localStorage.removeItem("token");
     }
   }, [token]);
+
+  useEffect(() => {
+    const handleInterceptorLogout = () => {
+      setToken("");
+      setUser(null);
+    };
+
+    window.addEventListener('auth-logout', handleInterceptorLogout);
+    return () => window.removeEventListener('auth-logout', handleInterceptorLogout);
+  }, []);
 
   const signup = async (userData: SignupData): Promise<AuthResult> => {
     setAuthLoading(true);
@@ -117,27 +122,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       setToken(newToken);
       setUser({ username, email });
+      toast.success(`Welcome back, ${username}!`);
       setAuthLoading(false);
       return { success: true };
     } catch (error: any) {
       setAuthLoading(false);
 
       if (!error.response) {
+        const errorMsg = "Network error. Please check your connection.";
         return {
           success: false,
-          error: "Network error. Please check your connection.",
+          error: errorMsg,
         };
       }
 
       const errorMessage =
         error.response?.data?.message || "Login failed. Please try again.";
+      toast.error(errorMessage);
       return { success: false, error: errorMessage };
     }
   };
 
   const logout = () => {
+    const username = user?.username;
     setToken("");
     setUser(null);
+    toast.success(`Goodbye${username ? `, ${username}` : ''}! You've been logged out.`);
   };
 
   const value = {

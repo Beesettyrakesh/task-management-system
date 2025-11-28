@@ -1,5 +1,6 @@
 import React from "react";
 import Layout from "../components/Layout";
+import TaskList from "../components/TaskList";
 import { useAuth } from "../hooks/useAuth";
 
 const Dashboard: React.FC = () => {
@@ -249,38 +250,15 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Recent Tasks Placeholder */}
+            {/* Tasks List Section */}
             <div className="bg-white shadow-lg rounded-lg border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Recent Tasks
+                  Your Tasks
                 </h2>
               </div>
               <div className="p-6">
-                <div className="text-center py-12">
-                  <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                    />
-                  </svg>
-                  <h3 className="mt-4 text-lg font-medium text-gray-900">
-                    No tasks yet
-                  </h3>
-                  <p className="mt-2 text-gray-500">
-                    Get started by creating your first task!
-                  </p>
-                  <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                    Create Task
-                  </button>
-                </div>
+                <TaskList />
               </div>
             </div>
           </div>

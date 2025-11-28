@@ -4,6 +4,33 @@ export interface User {
   email: string;
 }
 
+// Task related types
+export interface Task {
+  id: number;
+  title: string;
+  description?: string;
+  status: TaskStatus;
+  priority: Priority;
+  dueDate?: string;
+  user?: User;
+  createdAt: string;
+  updatedAt?: string;
+  createdBy: string;
+  lastModifiedBy?: string;
+}
+
+export enum TaskStatus {
+  TODO = "TODO",
+  IN_PROGRESS = "IN_PROGRESS",
+  DONE = "DONE",
+}
+
+export enum Priority {
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+}
+
 // Auth context types
 export interface AuthContextType {
   user: User | null;

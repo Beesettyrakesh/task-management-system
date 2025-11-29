@@ -1,12 +1,13 @@
 import { SignupFormData } from "@/types";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useNavigate, Link } from "react-router-dom";
 import toast from 'react-hot-toast';
-import { useAuth } from "../hooks/useAuth";
+import { Link, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
+import { useAuth } from "../hooks/useAuth";
+import { useEffect } from "react";
 
 const Signup: React.FC = () => {
-  const { signup, authLoading } = useAuth();
+  const { signup, authLoading, loading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const {
@@ -15,6 +16,12 @@ const Signup: React.FC = () => {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<SignupFormData>();
+
+    useEffect(() => {
+      if(!loading && isAuthenticated) {
+        navigate('/dashboard', { replace: true });
+      }
+    }, [isAuthenticated, loading, navigate]);
 
   const onSubmit: SubmitHandler<SignupFormData> = async (data) => {
     const result = await signup(data);

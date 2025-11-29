@@ -1,10 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import Layout from "../components/Layout";
 import TaskList from "../components/TaskList";
+import TaskForm from "../components/TaskForm";
+import Modal from "../components/Modal";
 import { useAuth } from "../hooks/useAuth";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleCreateTask = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handleTaskCreated = () => {
+    setIsCreateModalOpen(false);
+    // Trigger TaskList refresh by updating the key
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -175,7 +189,10 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 group">
+                  <button 
+                    onClick={handleCreateTask}
+                    className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 group"
+                  >
                     <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3 group-hover:bg-blue-200 transition-colors">
                       <svg
                         className="w-5 h-5 text-blue-600"
@@ -258,7 +275,7 @@ const Dashboard: React.FC = () => {
                 </h2>
               </div>
               <div className="p-6">
-                <TaskList />
+                <TaskList key={refreshTrigger} />
               </div>
             </div>
           </div>
@@ -320,18 +337,24 @@ const Dashboard: React.FC = () => {
                     </span>
                     <span className="font-semibold text-gray-900">0</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">
-                      Productivity score
-                    </span>
-                    <span className="font-semibold text-blue-600">100%</span>
-                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Create Task Modal */}
+      <Modal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)}
+        size="xl"
+      >
+        <TaskForm 
+          onSuccess={handleTaskCreated}
+          onCancel={() => setIsCreateModalOpen(false)}
+        />
+      </Modal>
     </Layout>
   );
 };

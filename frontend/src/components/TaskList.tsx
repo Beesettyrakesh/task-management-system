@@ -93,9 +93,6 @@ const TaskList = () => {
           <p className="text-gray-600 mb-6">
             You haven't created any tasks yet. Create your first task to get started!
           </p>
-          <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-            Create Your First Task
-          </button>
         </div>
       </div>
     );

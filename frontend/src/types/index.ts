@@ -19,6 +19,20 @@ export interface Task {
   lastModifiedBy?: string;
 }
 
+export interface TaskFormData {
+  title: string;
+  description: string;
+  dueDate: Date | null;
+  priority: { value: Priority; label: string } | null;
+  status: { value: TaskStatus; label: string } | null;
+}
+
+// Option types for react-select
+export interface SelectOption<T> {
+  value: T;
+  label: string;
+}
+
 export enum TaskStatus {
   TODO = "TODO",
   IN_PROGRESS = "IN_PROGRESS",

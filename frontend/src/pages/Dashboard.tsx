@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Layout from "../components/Layout";
-import TaskList from "../components/TaskList";
-import TaskForm from "../components/TaskForm";
 import Modal from "../components/Modal";
+import TaskForm from "../components/TaskForm";
+import TaskList from "../components/TaskList";
 import { useAuth } from "../hooks/useAuth";
 
 const Dashboard: React.FC = () => {
@@ -16,8 +16,11 @@ const Dashboard: React.FC = () => {
 
   const handleTaskCreated = () => {
     setIsCreateModalOpen(false);
-    // Trigger TaskList refresh by updating the key
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
+  };
+
+  const handleStatusUpdated = () => {
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const currentDate = new Date().toLocaleDateString("en-US", {
@@ -189,7 +192,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <button 
+                  <button
                     onClick={handleCreateTask}
                     className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 group"
                   >
@@ -275,7 +278,10 @@ const Dashboard: React.FC = () => {
                 </h2>
               </div>
               <div className="p-6">
-                <TaskList key={refreshTrigger} />
+                <TaskList
+                  key={refreshTrigger}
+                  onSuccess={handleStatusUpdated}
+                />
               </div>
             </div>
           </div>
@@ -345,12 +351,12 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Create Task Modal */}
-      <Modal 
-        isOpen={isCreateModalOpen} 
+      <Modal
+        isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         size="xl"
       >
-        <TaskForm 
+        <TaskForm
           onSuccess={handleTaskCreated}
           onCancel={() => setIsCreateModalOpen(false)}
         />

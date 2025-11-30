@@ -1,9 +1,13 @@
 import API from "../services/api";
 import { Task } from "@/types";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import TaskCard from "./TaskCard";
 
-const TaskList = () => {
+interface TaskListProps {
+  onSuccess?: () => void
+}
+
+const TaskList: React.FC<TaskListProps> = ({ onSuccess }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +124,7 @@ const TaskList = () => {
       {/* Tasks grid - responsive layout */}
       <div className="grid grid-cols-1 gap-4">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} refreshDashboard={onSuccess}/>
         ))}
       </div>
     </div>

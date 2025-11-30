@@ -97,7 +97,7 @@ export const getDueDateStyle = (dueDateString: string): string => {
 export const formatStatusText = (status: TaskStatus): string => {
   switch (status) {
     case TaskStatus.TODO:
-      return "To Do";
+      return "ToDo";
     case TaskStatus.IN_PROGRESS:
       return "In Progress";
     case TaskStatus.DONE:

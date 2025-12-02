@@ -5,14 +5,29 @@ import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import Select from "react-select";
 import API from "../services/api";
-import { Priority, SelectOption, TaskFormData, TaskStatus } from "../types";
+import { Priority, SelectOption, Task, TaskFormData, TaskStatus } from "../types";
+import { convertTaskToFormData, formatTaskForApi } from "../utils/taskUtils";
 
 interface TaskFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
+  taskToEdit?: Task; // For edit mode
+  taskDefaultValues?: TaskFormData; // For backward compatibility
 }
 
-const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel }) => {
+const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel, taskToEdit, taskDefaultValues }) => {
+  const isEditMode = !!taskToEdit;
+  
+  // Convert Task to TaskFormData if editing
+  const formDefaultValues = taskToEdit 
+    ? convertTaskToFormData(taskToEdit)
+    : taskDefaultValues || {
+        title: "",
+        description: "",
+        dueDate: null,
+        priority: null,
+        status: null,
+      };
   const {
     register,
     handleSubmit,
@@ -20,13 +35,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel }) => {
     control,
     reset,
   } = useForm<TaskFormData>({
-    defaultValues: {
-      title: "",
-      description: "",
-      dueDate: null,
-      priority: null,
-      status: { value: TaskStatus.TODO, label: "Todo" },
-    },
+    defaultValues: formDefaultValues,
   });
 
   const priorityOptions: SelectOption<Priority>[] = Object.values(Priority).map(
@@ -48,27 +57,29 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel }) => {
 
   const onSubmit: SubmitHandler<TaskFormData> = async (data) => {
     try {
-      const taskData = {
-        title: data.title,
-        description: data.description,
-        dueDate: data.dueDate ? data.dueDate.toISOString().split("T")[0] : null,
-        priority: data.priority?.value,
-        status: data.status?.value,
-      };
+      const taskData = formatTaskForApi(data);
 
-      await API.post("/tasks", taskData);
-      toast.success("Task created successfully!");
+      if (isEditMode && taskToEdit) {
+        await API.put(`/tasks/${taskToEdit.id}`, taskData);
+        toast.success("Task updated successfully!");
+      } else {
+        await API.post("/tasks", taskData);
+        toast.success("Task created successfully!");
+      }
+      
       reset();
       onSuccess?.();
     } catch (error: any) {
-      console.error("Error creating task:", error);
-      toast.error(error.response?.data?.message || "Failed to create task");
+      console.error(`Error ${isEditMode ? 'updating' : 'creating'} task:`, error);
+      toast.error(error.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} task`);
     }
   };
 
   return (
     <div className="bg-white p-4 rounded-lg">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Create New Task</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-4">
+        {isEditMode ? "Edit Task" : "Create New Task"}
+      </h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
@@ -319,10 +330,10 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel }) => {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Creating...
+                {isEditMode ? "Updating..." : "Creating..."}
               </>
             ) : (
-              "Create Task"
+              isEditMode ? "Update Task" : "Create Task"
             )}
           </button>
 

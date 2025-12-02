@@ -8,10 +8,10 @@ export interface User {
 export interface Task {
   id: number;
   title: string;
-  description?: string;
+  description: string;
   status: TaskStatus;
   priority: Priority;
-  dueDate?: string;
+  dueDate: string;
   user?: User;
   createdAt: string;
   updatedAt?: string;

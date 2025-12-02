@@ -4,6 +4,7 @@ import Modal from "../components/Modal";
 import TaskForm from "../components/TaskForm";
 import TaskList from "../components/TaskList";
 import { useAuth } from "../hooks/useAuth";
+import { Priority, TaskFormData, TaskStatus } from "../types";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -34,6 +35,20 @@ const Dashboard: React.FC = () => {
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  const taskDefaultValues: TaskFormData = {
+    title: "",
+    description: "",
+    dueDate: new Date(),
+    priority: {
+      value: Priority.MEDIUM,
+      label: "",
+    },
+    status: {
+      value: TaskStatus.TODO,
+      label: "",
+    },
+  };
 
   return (
     <Layout>
@@ -357,6 +372,7 @@ const Dashboard: React.FC = () => {
         size="xl"
       >
         <TaskForm
+          taskDefaultValues={taskDefaultValues}
           onSuccess={handleTaskCreated}
           onCancel={() => setIsCreateModalOpen(false)}
         />

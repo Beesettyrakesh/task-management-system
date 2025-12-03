@@ -1,13 +1,17 @@
 package com.rakesh.taskmanagement.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.rakesh.taskmanagement.entity.Priority;
 import com.rakesh.taskmanagement.entity.Task;
+import com.rakesh.taskmanagement.entity.TaskStatus;
 import com.rakesh.taskmanagement.entity.User;
 import com.rakesh.taskmanagement.exception.ResourceNotFoundException;
 import com.rakesh.taskmanagement.repository.TaskRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 
 @Service
@@ -17,6 +21,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserService userService;
 
+    // CRUD services
     public Task createTask(Task task) {
         User currentUser = userService.getCurrentUser();
         task.setUser(currentUser);
@@ -67,5 +72,80 @@ public class TaskService {
             throw new ResourceNotFoundException("Task not found");
         }
     }
+
+    // filtering services
+    public List<Task> getTasksByStatus(TaskStatus status) {
+        User currentUser = userService.getCurrentUser();
+        return taskRepository.findByUserIdAndStatus(currentUser.getId(), status);
+    }
+
+    public List<Task> getTasksByPriority(Priority priority) {
+        User currentUser = userService.getCurrentUser();
+        return taskRepository.findByUserIdAndPriority(currentUser.getId(), priority);
+    }
+
+    private List<Task> getTasksSortedByDueDate(String direction) {
+        User currentUser = userService.getCurrentUser();
+        if("desc".equalsIgnoreCase(direction)) {
+            return taskRepository.findByUserIdOrderByDueDateDesc(currentUser.getId());
+        }
+
+        return taskRepository.findByUserIdOrderByDueDateAsc(currentUser.getId());
+    }
+
+    private List<Task> getTasksSortedByCreatedAt() {
+        User currentUser = userService.getCurrentUser();
+        return taskRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getId());
+    }
+
+    private List<Task> getTasksSortedByPriority(String sortDirection) {
+        User currentUser = userService.getCurrentUser();
+        if("asc".equalsIgnoreCase(sortDirection)) {
+            return taskRepository.findByUserIdOrderByPriorityAsc(currentUser.getId());
+        }
+        return taskRepository.findByUserIdOrderByPriorityDesc(currentUser.getId());
+    }
+
+    public List<Task> getFilteredTasks(TaskStatus status, Priority priority, String sortBy, String sortDirection) {
+        User currentUser = userService.getCurrentUser();
+        Long userId = currentUser.getId();
+        
+        if (status != null && priority != null) {
+            if ("dueDate".equals(sortBy)) {
+                return "desc".equalsIgnoreCase(sortDirection) 
+                    ? taskRepository.findByUserIdAndStatusAndPriorityOrderByDueDateDesc(userId, status, priority)
+                    : taskRepository.findByUserIdAndStatusAndPriorityOrderByDueDateAsc(userId, status, priority);
+            } else if ("createdAt".equals(sortBy)) {
+                return taskRepository.findByUserIdAndStatusAndPriorityOrderByCreatedAtDesc(userId, status, priority);
+            } else {
+                return taskRepository.findByUserIdAndStatusAndPriority(userId, status, priority);
+            }
+        }
+        
+        if (status != null) {
+            if ("dueDate".equals(sortBy)) {
+                return taskRepository.findByUserIdAndStatusOrderByDueDateAsc(userId, status);
+            }
+            return taskRepository.findByUserIdAndStatus(userId, status);
+        }
+        
+        if (priority != null) {
+            if ("dueDate".equals(sortBy)) {
+                return taskRepository.findByUserIdAndPriorityOrderByDueDateAsc(userId, priority);
+            }
+            return taskRepository.findByUserIdAndPriority(userId, priority);
+        }
+        
+        if ("dueDate".equals(sortBy)) {
+            return getTasksSortedByDueDate(sortDirection);
+        } else if ("createdAt".equals(sortBy)) {
+            return getTasksSortedByCreatedAt();
+        } else if ("priority".equals(sortBy)) {
+            return getTasksSortedByPriority(sortDirection);
+        }
+        
+        return getAllTasks();
+    }
+
 
 }

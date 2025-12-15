@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import FilterControls, { TaskFilters } from "../components/FilterControls";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import TaskForm from "../components/TaskForm";
@@ -10,6 +11,9 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [filters, setFilters] = useState<TaskFilters>({
+    sortDirection: "asc",
+  });
 
   const handleCreateTask = () => {
     setIsCreateModalOpen(true);
@@ -22,6 +26,14 @@ const Dashboard: React.FC = () => {
 
   const handleStatusUpdated = () => {
     setRefreshTrigger((prev) => prev + 1);
+  };
+
+  const handleFiltersChange = (newFilters: TaskFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({ sortDirection: "asc" });
   };
 
   const currentDate = new Date().toLocaleDateString("en-US", {
@@ -194,11 +206,8 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Recent Tasks & Quick Actions */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Quick Actions */}
             <div className="bg-white shadow-lg rounded-lg border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -285,7 +294,6 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Tasks List Section */}
             <div className="bg-white shadow-lg rounded-lg border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -293,17 +301,22 @@ const Dashboard: React.FC = () => {
                 </h2>
               </div>
               <div className="p-6">
+                <FilterControls
+                  filters={filters}
+                  onFiltersChange={handleFiltersChange}
+                  onClearFilters={handleClearFilters}
+                />
+
                 <TaskList
                   key={refreshTrigger}
                   onSuccess={handleStatusUpdated}
+                  filters={filters}
                 />
               </div>
             </div>
           </div>
 
-          {/* Right Column - Profile & Activity */}
           <div className="space-y-6">
-            {/* User Profile Card */}
             <div className="bg-white shadow-lg rounded-lg border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -337,7 +350,6 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Activity Summary */}
             <div className="bg-white shadow-lg rounded-lg border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -365,7 +377,6 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Create Task Modal */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}

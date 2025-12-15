@@ -1,13 +1,15 @@
-import API from "../services/api";
-import { Task } from "@/types";
+import { Task } from "../types";
 import React, { useEffect, useState } from "react";
+import API from "../services/api";
 import TaskCard from "./TaskCard";
+import { TaskFilters } from "./FilterControls";
 
 interface TaskListProps {
-  onSuccess?: () => void
+  onSuccess?: () => void;
+  filters?: TaskFilters;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ onSuccess }) => {
+const TaskList: React.FC<TaskListProps> = ({ onSuccess, filters }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,8 +18,26 @@ const TaskList: React.FC<TaskListProps> = ({ onSuccess }) => {
     const fetchTasks = async () => {
       try {
         setError(null);
-        const response = await API.get("/tasks");
-        setTasks(response.data);
+        const params = new URLSearchParams();
+        if(filters?.status) params.append('status', filters.status);
+        if(filters?.priority) params.append('priority', filters.priority);
+        if(filters?.sortBy) params.append('sortBy', filters.sortBy);
+        if(filters?.sortDirection) params.append('sortDirection', filters.sortDirection);
+
+        const queryString = params.toString();
+        const url = queryString ? `/tasks?${queryString}` : '/tasks';
+
+        const response = await API.get(url);
+        let tasks = response.data;
+
+        if(filters?.search) {
+          const searchTerm = filters.search.toLowerCase();
+          tasks = tasks.filter((task: Task) => 
+            task.title.toLowerCase().includes(searchTerm) ||
+            task.description.toLowerCase().includes(searchTerm)
+          );
+        }
+        setTasks(tasks);
       } catch (error: any) {
         console.error("Error fetching tasks:", error);
         setError(error.response?.data?.message || "Failed to fetch tasks");
@@ -26,7 +46,7 @@ const TaskList: React.FC<TaskListProps> = ({ onSuccess }) => {
       }
     };
     fetchTasks();
-  }, []);
+  }, [filters]);
 
   // Loading state with spinner
   if (loading) {
@@ -95,28 +115,28 @@ const TaskList: React.FC<TaskListProps> = ({ onSuccess }) => {
             No tasks found
           </h3>
           <p className="text-gray-600 mb-6">
-            You haven't created any tasks yet. Create your first task to get started!
+            You haven't created any tasks yet. Create your first task to get
+            started!
           </p>
         </div>
       </div>
     );
   }
 
-  // Tasks display with responsive grid
   return (
     <div className="space-y-4">
       {/* Tasks summary */}
       <div className="flex justify-between items-center text-sm text-gray-600 pb-2">
         <span className="font-medium">
-          {tasks.length} task{tasks.length !== 1 ? 's' : ''} total
+          {tasks.length} task{tasks.length !== 1 ? "s" : ""} total
         </span>
         <div className="flex items-center space-x-4">
           <span>
-            {tasks.filter(task => task.status === 'DONE').length} completed
+            {tasks.filter((task) => task.status === "DONE").length} completed
           </span>
           <span>•</span>
           <span>
-            {tasks.filter(task => task.status !== 'DONE').length} remaining
+            {tasks.filter((task) => task.status !== "DONE").length} remaining
           </span>
         </div>
       </div>
@@ -124,7 +144,7 @@ const TaskList: React.FC<TaskListProps> = ({ onSuccess }) => {
       {/* Tasks grid - responsive layout */}
       <div className="grid grid-cols-1 gap-4">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} refreshDashboard={onSuccess}/>
+          <TaskCard key={task.id} task={task} refreshDashboard={onSuccess} />
         ))}
       </div>
     </div>

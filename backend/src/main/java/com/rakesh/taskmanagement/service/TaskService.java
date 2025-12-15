@@ -115,24 +115,52 @@ public class TaskService {
                 return "desc".equalsIgnoreCase(sortDirection) 
                     ? taskRepository.findByUserIdAndStatusAndPriorityOrderByDueDateDesc(userId, status, priority)
                     : taskRepository.findByUserIdAndStatusAndPriorityOrderByDueDateAsc(userId, status, priority);
+            } else if ("priority".equals(sortBy)) {
+                return "desc".equalsIgnoreCase(sortDirection)
+                ? taskRepository.findByUserIdAndStatusAndPriorityOrderByPriorityDesc(userId, status, priority)
+                : taskRepository.findByUserIdAndStatusAndPriorityOrderByPriorityAsc(userId, status, priority);
             } else if ("createdAt".equals(sortBy)) {
-                return taskRepository.findByUserIdAndStatusAndPriorityOrderByCreatedAtDesc(userId, status, priority);
-            } else {
-                return taskRepository.findByUserIdAndStatusAndPriority(userId, status, priority);
-            }
+                return "desc".equalsIgnoreCase(sortDirection)
+                    ? taskRepository.findByUserIdAndStatusAndPriorityOrderByCreatedAtDesc(userId, status, priority)
+                    : taskRepository.findByUserIdAndStatusAndPriorityOrderByCreatedAtAsc(userId, status, priority);
+            } 
+            
+            return taskRepository.findByUserIdAndStatusAndPriority(userId, status, priority);
         }
         
         if (status != null) {
             if ("dueDate".equals(sortBy)) {
-                return taskRepository.findByUserIdAndStatusOrderByDueDateAsc(userId, status);
+                return "desc".equalsIgnoreCase(sortDirection)
+                    ? taskRepository.findByUserIdAndStatusOrderByDueDateDesc(userId, status)
+                    : taskRepository.findByUserIdAndStatusOrderByDueDateAsc(userId, status);
+            } else if ("priority".equals(sortBy)) {
+                return "desc".equalsIgnoreCase(sortDirection)
+                    ? taskRepository.findByUserIdAndStatusOrderByPriorityDesc(userId, status)
+                    : taskRepository.findByUserIdAndStatusOrderByPriorityAsc(userId, status);
+            } else if ("createdAt".equals(sortBy)) {
+                return "desc".equalsIgnoreCase(sortDirection)
+                    ? taskRepository.findByUserIdAndStatusOrderByCreatedAtDesc(userId, status)
+                    : taskRepository.findByUserIdAndStatusOrderByCreatedAtAsc(userId, status);
             }
+
             return taskRepository.findByUserIdAndStatus(userId, status);
         }
         
         if (priority != null) {
             if ("dueDate".equals(sortBy)) {
-                return taskRepository.findByUserIdAndPriorityOrderByDueDateAsc(userId, priority);
+                return "desc".equalsIgnoreCase(sortDirection)
+                    ? taskRepository.findByUserIdAndPriorityOrderByDueDateDesc(userId, priority)
+                    : taskRepository.findByUserIdAndPriorityOrderByDueDateAsc(userId, priority);
+            } else if ("priority".equals(sortBy)) {
+                return "desc".equalsIgnoreCase(sortDirection)
+                    ? taskRepository.findByUserIdAndPriorityOrderByPriorityDesc(userId, priority)
+                    : taskRepository.findByUserIdAndPriorityOrderByPriorityAsc(userId, priority);
+            } else if ("createdAt".equals(sortBy)) {
+                return "desc".equalsIgnoreCase(sortDirection)
+                    ? taskRepository.findByUserIdAndPriorityOrderByCreatedAtDesc(userId, priority)
+                    : taskRepository.findByUserIdAndPriorityOrderByCreatedAtAsc(userId, priority);
             }
+
             return taskRepository.findByUserIdAndPriority(userId, priority);
         }
         

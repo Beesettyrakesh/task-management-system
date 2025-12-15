@@ -30,21 +30,33 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByUserIdOrderByPriorityDesc(Long userId);
     List<Task> findByUserIdOrderByPriorityAsc(Long userId);
 
-    // Combined filters (status + sorting)
+    // Combined filters (status + priority + sorting)
     List<Task> findByUserIdAndStatusOrderByDueDateAsc(Long userId, TaskStatus status);
     List<Task> findByUserIdAndPriorityOrderByDueDateAsc(Long userId, Priority priority);
     List<Task> findByUserIdAndStatusAndPriority(Long userId, TaskStatus status, Priority priority);
     List<Task> findByUserIdAndStatusAndPriorityOrderByDueDateAsc(Long userId, TaskStatus status, Priority priority);
     List<Task> findByUserIdAndStatusAndPriorityOrderByDueDateDesc(Long userId, TaskStatus status, Priority priority);
     List<Task> findByUserIdAndStatusAndPriorityOrderByCreatedAtDesc(Long userId, TaskStatus status, Priority priority);
+    List<Task> findByUserIdAndStatusAndPriorityOrderByCreatedAtAsc(Long userId, TaskStatus status, Priority priority);
+    List<Task> findByUserIdAndStatusAndPriorityOrderByPriorityAsc(Long userId, TaskStatus status, Priority priority);
+    List<Task> findByUserIdAndStatusAndPriorityOrderByPriorityDesc(Long userId, TaskStatus status, Priority priority);
+
 
     // Status + Priority sorting combinations
     List<Task> findByUserIdAndStatusOrderByPriorityAsc(Long userId, TaskStatus status);
     List<Task> findByUserIdAndStatusOrderByPriorityDesc(Long userId, TaskStatus status);
+    List<Task> findByUserIdAndStatusOrderByDueDateDesc(Long userId, TaskStatus status);
+    List<Task> findByUserIdAndStatusOrderByCreatedAtDesc(Long userId, TaskStatus status);
+    List<Task> findByUserIdAndStatusOrderByCreatedAtAsc(Long userId, TaskStatus status);
+
 
     // Priority + Priority sorting combinations (for completeness) 
     List<Task> findByUserIdAndPriorityOrderByPriorityAsc(Long userId, Priority priority);  
     List<Task> findByUserIdAndPriorityOrderByPriorityDesc(Long userId, Priority priority);
-
+    
+    // Priority + Sorting  
+    List<Task> findByUserIdAndPriorityOrderByDueDateDesc(Long userId, Priority priority);
+    List<Task> findByUserIdAndPriorityOrderByCreatedAtDesc(Long userId, Priority priority);
+    List<Task> findByUserIdAndPriorityOrderByCreatedAtAsc(Long userId, Priority priority);
 
 }

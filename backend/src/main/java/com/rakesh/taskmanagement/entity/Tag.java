@@ -1,6 +1,7 @@
 package com.rakesh.taskmanagement.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class Tag {
     private Long id;
 
     @Column(nullable = false)
+    @NotBlank(message = "Tag name is required")
     @Size(min = 1, max = 50, message = "Tag name must be between 1 and 50 characters")
     private String name;
 

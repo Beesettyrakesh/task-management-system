@@ -1,8 +1,11 @@
 package com.rakesh.taskmanagement.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.rakesh.taskmanagement.entity.Priority;
@@ -12,6 +15,15 @@ import com.rakesh.taskmanagement.entity.TaskStatus;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByUserId(Long userId);
+
+    @Query("SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.tags WHERE t.user.id = :userId")
+    List<Task> findAllByUserIdWithTags(@Param("userId") Long userId);
+
+    @Query("SELECT t FROM Task t LEFT JOIN FETCH t.tags WHERE t.id = :id")
+    Optional<Task> findByIdWithTags(@Param("id") Long id);
+
+    @Query("SELECT t FROM Task t LEFT JOIN FETCH t.tags WHERE t.id = :id AND t.user.id = :userId")
+    Optional<Task> findByIdAndUserIdWithTags(@Param("id") Long id, @Param("userId") Long userId);
 
     // Status-based filtering
     List<Task> findByUserIdAndStatus(Long userId, TaskStatus status);

@@ -2,12 +2,10 @@ package com.rakesh.taskmanagement.service;
 
 import java.util.List;
 
+import com.rakesh.taskmanagement.entity.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.rakesh.taskmanagement.entity.Priority;
-import com.rakesh.taskmanagement.entity.Task;
-import com.rakesh.taskmanagement.entity.TaskStatus;
-import com.rakesh.taskmanagement.entity.User;
 import com.rakesh.taskmanagement.exception.ResourceNotFoundException;
 import com.rakesh.taskmanagement.repository.TaskRepository;
 
@@ -18,8 +16,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TaskService {
 
-    private final TaskRepository taskRepository;
     private final UserService userService;
+    private final TaskRepository taskRepository;
+    private final TagService tagService;
 
     // CRUD services
     public Task createTask(Task task) {
@@ -28,24 +27,23 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
+    @Transactional(readOnly = true)
     public List<Task> getAllTasks() {
         User currentUser = userService.getCurrentUser();
-        return taskRepository.findByUserId(currentUser.getId());
+        return taskRepository.findAllByUserIdWithTags(currentUser.getId());
     }
 
+    @Transactional(readOnly = true)
     public Task getTaskById(Long id) {
         User currentUser = userService.getCurrentUser();
         Task task = taskRepository
-                .findById(id)
+                .findByIdAndUserIdWithTags(id, currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
-
-        if(task.getUser().getId() != currentUser.getId()) {
-            throw new ResourceNotFoundException("Task not found");
-        }
-
+        
         return task;
     }
 
+    @Transactional
     public Task updateTask(Long id, Task task) {
         User currentUser = userService.getCurrentUser();
         Task existingTask = taskRepository
@@ -173,6 +171,24 @@ public class TaskService {
         }
         
         return getAllTasks();
+    }
+
+    @Transactional
+    public void assignTagToTask(Long taskId, Long tagId) {
+        Task task = getTaskById(taskId);
+        Tag tag = tagService.getTagById(tagId);
+
+        task.getTags().add(tag);
+        taskRepository.save(task);
+    }
+
+    @Transactional
+    public void removeTagFromTask(Long taskId, Long tagId) {
+        Task task = getTaskById(taskId);
+        Tag tag = tagService.getTagById(tagId);
+
+        task.getTags().remove(tag);
+        taskRepository.save(task);
     }
 
 

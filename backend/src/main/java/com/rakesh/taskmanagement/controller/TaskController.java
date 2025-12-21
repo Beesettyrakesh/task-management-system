@@ -1,6 +1,7 @@
 package com.rakesh.taskmanagement.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rakesh.taskmanagement.dto.TaskResponseDto;
 import com.rakesh.taskmanagement.entity.Priority;
 import com.rakesh.taskmanagement.entity.Task;
 import com.rakesh.taskmanagement.entity.TaskStatus;
@@ -32,13 +34,14 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody Task task) {
+    public ResponseEntity<TaskResponseDto> createTask(@RequestBody Task task) {
         Task createdTask = taskService.createTask(task);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
+        TaskResponseDto responseDto = TaskResponseDto.from(createdTask);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @GetMapping
-    public ResponseEntity<List<Task>> getAllTasks(    
+    public ResponseEntity<List<TaskResponseDto>> getAllTasks(    
         @RequestParam(required = false) String status,
         @RequestParam(required = false) String priority,
         @RequestParam(required = false) String sortBy,
@@ -57,19 +60,26 @@ public class TaskController {
         } else {
             tasks = taskService.getAllTasks();
         }
-        return ResponseEntity.ok(tasks);
+
+        List<TaskResponseDto> responseDtos = tasks.stream()
+            .map(TaskResponseDto::from)
+            .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responseDtos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
+    public ResponseEntity<TaskResponseDto> getTaskById(@PathVariable Long id) {
         Task task = taskService.getTaskById(id);
-        return ResponseEntity.ok(task);
+        TaskResponseDto responseDto = TaskResponseDto.from(task);
+        return ResponseEntity.ok(responseDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task task) {
-        Task updatedtask = taskService.updateTask(id, task);
-        return ResponseEntity.status(HttpStatus.OK).body(updatedtask);
+    public ResponseEntity<TaskResponseDto> updateTask(@PathVariable Long id, @RequestBody Task task) {
+        Task updatedTask = taskService.updateTask(id, task);
+        TaskResponseDto responseDto = TaskResponseDto.from(updatedTask);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @DeleteMapping("/{id}")
@@ -79,14 +89,32 @@ public class TaskController {
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Task>> getTasksByStatus(@PathVariable TaskStatus status) {
+    public ResponseEntity<List<TaskResponseDto>> getTasksByStatus(@PathVariable TaskStatus status) {
         List<Task> tasks = taskService.getTasksByStatus(status);
-        return ResponseEntity.ok(tasks);
+        List<TaskResponseDto> responseDtos = tasks.stream()
+            .map(TaskResponseDto::from)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDtos);
     }
 
     @GetMapping("/priority/{priority}")
-    public ResponseEntity<List<Task>> getTasksByPriority(@PathVariable Priority priority) {
+    public ResponseEntity<List<TaskResponseDto>> getTasksByPriority(@PathVariable Priority priority) {
         List<Task> tasks = taskService.getTasksByPriority(priority);
-        return ResponseEntity.ok(tasks);
+        List<TaskResponseDto> responseDtos = tasks.stream()
+            .map(TaskResponseDto::from)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDtos);
+    }
+
+    @PostMapping("/{taskId}/tags/{tagId}")
+    public ResponseEntity<Void> assignTagToTask(@PathVariable Long taskId, @PathVariable Long tagId) {
+        taskService.assignTagToTask(taskId, tagId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{taskId}/tags/{tagId}")
+    public ResponseEntity<Void> removeTagFromTask(@PathVariable Long taskId, @PathVariable Long tagId) {
+        taskService.removeTagFromTask(taskId, tagId);
+        return ResponseEntity.noContent().build();
     }
 }

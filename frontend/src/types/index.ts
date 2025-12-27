@@ -13,6 +13,7 @@ export interface Task {
   priority: Priority;
   dueDate: string;
   user?: User;
+  tags: Tag[];
   createdAt: string;
   updatedAt?: string;
   createdBy: string;
@@ -25,6 +26,21 @@ export interface TaskFormData {
   dueDate: Date | null;
   priority: { value: Priority; label: string } | null;
   status: { value: TaskStatus; label: string } | null;
+  tags: Tag[];
+}
+
+// Tag related types
+export interface Tag {
+  id: number;
+  name: string;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TagFormData {
+  name: string;
+  color: string;
 }
 
 // Option types for react-select

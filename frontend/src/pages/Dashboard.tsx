@@ -1,3 +1,4 @@
+import TagManager from "@/components/TagManager";
 import React, { useState } from "react";
 import FilterControls, { TaskFilters } from "../components/FilterControls";
 import Layout from "../components/Layout";
@@ -11,6 +12,7 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showTagManager, setShowTagManager] = useState(false);
   const [filters, setFilters] = useState<TaskFilters>({
     sortDirection: "asc",
   });
@@ -21,11 +23,11 @@ const Dashboard: React.FC = () => {
 
   const handleTaskCreated = () => {
     setIsCreateModalOpen(false);
-    setRefreshTrigger((prev) => prev + 1);
+    handleRefresh();
   };
 
   const handleStatusUpdated = () => {
-    setRefreshTrigger((prev) => prev + 1);
+    handleRefresh();
   };
 
   const handleFiltersChange = (newFilters: TaskFilters) => {
@@ -34,6 +36,10 @@ const Dashboard: React.FC = () => {
 
   const handleClearFilters = () => {
     setFilters({ sortDirection: "asc" });
+  };
+
+  const handleRefresh = () => {
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const currentDate = new Date().toLocaleDateString("en-US", {
@@ -60,6 +66,7 @@ const Dashboard: React.FC = () => {
       value: TaskStatus.TODO,
       label: "",
     },
+    tags: [],
   };
 
   return (
@@ -204,6 +211,20 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">🏷️ Tag Management</h3>
+            <button
+              onClick={() => setShowTagManager(!showTagManager)}
+              className="text-blue-500 hover:text-blue-700"
+            >
+              {showTagManager ? "Hide" : "Show"}
+            </button>
+          </div>
+
+          {showTagManager && <TagManager onTagsChange={handleRefresh} />}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

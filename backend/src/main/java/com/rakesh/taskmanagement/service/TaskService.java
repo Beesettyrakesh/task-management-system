@@ -1,12 +1,19 @@
 package com.rakesh.taskmanagement.service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import com.rakesh.taskmanagement.entity.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.rakesh.taskmanagement.entity.Priority;
+import com.rakesh.taskmanagement.entity.Tag;
+import com.rakesh.taskmanagement.entity.Task;
+import com.rakesh.taskmanagement.entity.TaskStatus;
+import com.rakesh.taskmanagement.entity.User;
 import com.rakesh.taskmanagement.exception.ResourceNotFoundException;
+import com.rakesh.taskmanagement.repository.TagRepository;
 import com.rakesh.taskmanagement.repository.TaskRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +26,7 @@ public class TaskService {
     private final UserService userService;
     private final TaskRepository taskRepository;
     private final TagService tagService;
+    private final TagRepository tagRepository;
 
     // CRUD services
     public Task createTask(Task task) {
@@ -54,9 +62,23 @@ public class TaskService {
             throw new ResourceNotFoundException("Task not found");
         }
 
-        task.setId(id);
-        task.setUser(currentUser);
-        return taskRepository.save(task);
+        existingTask.setTitle(task.getTitle());
+        existingTask.setDescription(task.getDescription());
+        existingTask.setPriority(task.getPriority());
+        existingTask.setStatus(task.getStatus());
+        existingTask.setDueDate(task.getDueDate());
+
+        if (task.getTags() != null) {
+            List<Long> tagIds = task.getTags().stream()
+                .map(Tag::getId)
+                .collect(Collectors.toList());
+
+            List<Tag> managedTags = tagRepository.findAllById(tagIds);
+            existingTask.setTags(new HashSet<>(managedTags));
+        } else {
+            existingTask.setTags(new HashSet<>());
+        }
+        return taskRepository.save(existingTask);
     }
 
     public void deleteTask(Long id) {

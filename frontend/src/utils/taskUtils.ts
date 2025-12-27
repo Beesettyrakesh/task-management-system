@@ -58,7 +58,7 @@ export const isOverdue = (dueDateString: string): boolean => {
   return dueDate < today;
 };
 
-// New utility function to convert Task to TaskFormData
+// Utility function to convert Task to TaskFormData
 export const convertTaskToFormData = (task: Task): TaskFormData => {
   return {
     title: task.title,
@@ -79,6 +79,7 @@ export const convertTaskToFormData = (task: Task): TaskFormData => {
             .replace(/\b\w/g, (l) => l.toUpperCase()),
         }
       : null,
+    tags: task.tags || [],
   };
 };
 
@@ -90,6 +91,7 @@ export const formatTaskForApi = (data: TaskFormData) => {
     dueDate: data.dueDate ? data.dueDate.toISOString().split("T")[0] : null,
     priority: data.priority?.value,
     status: data.status?.value,
+    tags: data.tags || [],
   };
 };
 

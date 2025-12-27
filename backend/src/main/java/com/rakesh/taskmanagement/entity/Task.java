@@ -47,7 +47,6 @@ public class Task {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User user;
 
-    @JsonIgnore
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "task_tags",

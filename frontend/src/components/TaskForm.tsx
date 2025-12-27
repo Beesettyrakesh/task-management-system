@@ -1,25 +1,50 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import Select from "react-select";
 import API from "../services/api";
-import { Priority, SelectOption, Task, TaskFormData, TaskStatus } from "../types";
+import {
+  Priority,
+  SelectOption,
+  Tag,
+  Task,
+  TaskFormData,
+  TaskStatus,
+} from "../types";
 import { convertTaskToFormData, formatTaskForApi } from "../utils/taskUtils";
+import TagSelector from "./TagSelector";
 
 interface TaskFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
-  taskToEdit?: Task; // For edit mode
-  taskDefaultValues?: TaskFormData; // For backward compatibility
+  taskToEdit?: Task;
+  taskDefaultValues?: TaskFormData;
 }
 
-const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel, taskToEdit, taskDefaultValues }) => {
+const TaskForm: React.FC<TaskFormProps> = ({
+  onSuccess,
+  onCancel,
+  taskToEdit,
+  taskDefaultValues,
+}) => {
   const isEditMode = !!taskToEdit;
-  
-  // Convert Task to TaskFormData if editing
-  const formDefaultValues = taskToEdit 
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await API.get("/tags");
+        setAvailableTags(response.data);
+      } catch (error) {
+        console.error("Failed to fetch available tags:", error);
+      }
+    };
+    fetchTags();
+  }, []);
+
+  const formDefaultValues = taskToEdit
     ? convertTaskToFormData(taskToEdit)
     : taskDefaultValues || {
         title: "",
@@ -27,13 +52,17 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel, taskToEdit, ta
         dueDate: null,
         priority: null,
         status: null,
+        tags: [],
       };
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     control,
     reset,
+    setValue,
+    watch,
   } = useForm<TaskFormData>({
     defaultValues: formDefaultValues,
   });
@@ -56,8 +85,16 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel, taskToEdit, ta
   }));
 
   const onSubmit: SubmitHandler<TaskFormData> = async (data) => {
+    console.log("=== FORM SUBMIT DEBUG ===");
+    console.log("Form data:", data);
+    console.log("Object.keys(data):", Object.keys(data)); // ← See all properties
+    console.log("data['tags']:", data["tags"]); // ← Try bracket notation
+    console.log("data.tags:", data.tags);
+
     try {
       const taskData = formatTaskForApi(data);
+      console.log("Formatted task data:", taskData);
+      console.log("Formatted task tags:", taskData.tags);
 
       if (isEditMode && taskToEdit) {
         await API.put(`/tasks/${taskToEdit.id}`, taskData);
@@ -66,12 +103,17 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel, taskToEdit, ta
         await API.post("/tasks", taskData);
         toast.success("Task created successfully!");
       }
-      
       reset();
       onSuccess?.();
     } catch (error: any) {
-      console.error(`Error ${isEditMode ? 'updating' : 'creating'} task:`, error);
-      toast.error(error.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} task`);
+      console.error(
+        `Error ${isEditMode ? "updating" : "creating"} task:`,
+        error
+      );
+      toast.error(
+        error.response?.data?.message ||
+          `Failed to ${isEditMode ? "update" : "create"} task`
+      );
     }
   };
 
@@ -302,6 +344,17 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel, taskToEdit, ta
           )}
         </div>
 
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Tags
+          </label>
+          <TagSelector
+            selectedTags={watch("tags") || []}
+            availableTags={availableTags}
+            onTagsChange={(tags) => setValue("tags", tags)}
+          />
+        </div>
+
         <div className="flex space-x-4 pt-4">
           <button
             type="submit"
@@ -332,8 +385,10 @@ const TaskForm: React.FC<TaskFormProps> = ({ onSuccess, onCancel, taskToEdit, ta
                 </svg>
                 {isEditMode ? "Updating..." : "Creating..."}
               </>
+            ) : isEditMode ? (
+              "Update Task"
             ) : (
-              isEditMode ? "Update Task" : "Create Task"
+              "Create Task"
             )}
           </button>
 

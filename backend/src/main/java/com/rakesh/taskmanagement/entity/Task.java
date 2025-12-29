@@ -1,19 +1,23 @@
 package com.rakesh.taskmanagement.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.*;
-import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "tasks")
@@ -55,21 +59,25 @@ public class Task {
     )
     private Set<Tag> tags = new HashSet<>();
 
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Attachment> attachments = new HashSet<>();
+
+
     // ===== AUDIT FIELDS (Automatically managed by Spring) =====
 
-    @CreatedDate // ← Automatically set on creation
+    @CreatedDate
     @Column(name = "created_at", nullable = false,  updatable = false)
     private LocalDateTime createdAt;
 
-    @LastModifiedDate // ← Automatically updated on every save
+    @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @CreatedBy // ← Who created this (will be "system" until Spring Security is added)
+    @CreatedBy 
     @Column(name = "created_by",  updatable = false)
     private String createdBy;
 
-    @LastModifiedBy // ← Who last modified this
+    @LastModifiedBy
     @Column(name = "last_modified_by")
     private String lastModifiedBy;
 

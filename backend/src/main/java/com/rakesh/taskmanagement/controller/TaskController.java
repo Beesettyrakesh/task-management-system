@@ -117,4 +117,9 @@ public class TaskController {
         taskService.removeTagFromTask(taskId, tagId);
         return ResponseEntity.noContent().build();
     }
+
+    // @GetMapping("/{taskId}/attachments")
+    // public ResponseEntity<String> getTaskAttachments(@PathVariable Long taskId) {
+    //     return ResponseEntity.ok("Test attachment endpoint in TaskController - taskId: " + taskId);
+    // }
 }

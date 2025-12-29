@@ -29,5 +29,19 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE files
 .vscode/
+.vscode/launch.json
+.vscode/settings.json
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+

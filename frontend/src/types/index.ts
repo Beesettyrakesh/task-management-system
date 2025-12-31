@@ -114,3 +114,24 @@ export interface LoginFormData {
   username: string;
   password: string;
 }
+
+export interface Attachment {
+  id: number;
+  originalFileName: string;
+  storedFileName: string;
+  contentType: string;
+  fileSize: number;
+  storagePath: string;
+  uploadedAt: string;
+  task: {
+    id: number;
+    title: string;
+  }
+}
+
+export interface FileUploadProgress {
+  file: File;
+  progress: number;
+  status: 'uploading' | 'completed' | 'error';
+  error?: string;
+}

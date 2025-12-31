@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.rakesh.taskmanagement.dto.AttachmentResponseDto;
+import com.rakesh.taskmanagement.dto.BulkUploadResponseDto;
 import com.rakesh.taskmanagement.entity.Attachment;
 import com.rakesh.taskmanagement.service.AttachmentService;
 
@@ -28,6 +29,26 @@ public class AttachmentController {
     ) {
         Attachment attachment = attachmentService.uploadFile(taskId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(AttachmentResponseDto.from(attachment));
+    }
+
+    @PostMapping("/api/tasks/{taskId}/attachments/bulk")
+    public ResponseEntity<BulkUploadResponseDto> uploadFiles(
+            @PathVariable Long taskId,
+            @RequestParam("files") MultipartFile[] files
+    ) {
+        BulkUploadResponseDto response = attachmentService.uploadFiles(taskId, files);
+        
+        // Return appropriate HTTP status based on results
+        if (response.getFailureCount() == 0) {
+            // All files uploaded successfully
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else if (response.getSuccessCount() > 0) {
+            // Partial success (some files uploaded, some failed)
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(response);
+        } else {
+            // All files failed
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
     }
 
     @GetMapping("/api/tasks/{taskId}/attachments")

@@ -3,6 +3,7 @@ package com.rakesh.taskmanagement.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.rakesh.taskmanagement.dto.TaskStatisticsDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -118,8 +119,18 @@ public class TaskController {
         return ResponseEntity.noContent().build();
     }
 
-    // @GetMapping("/{taskId}/attachments")
-    // public ResponseEntity<String> getTaskAttachments(@PathVariable Long taskId) {
-    //     return ResponseEntity.ok("Test attachment endpoint in TaskController - taskId: " + taskId);
-    // }
+    @GetMapping("/statistics")
+    public ResponseEntity<TaskStatisticsDto> getTaskStatistics() {
+        TaskStatisticsDto taskStatisticsDto = taskService.getStatistics();
+        return ResponseEntity.ok(taskStatisticsDto);
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<List<TaskResponseDto>> getRecentTasks() {
+        List<Task> recentTasks = taskService.getRecentTasks();
+        List<TaskResponseDto> response = recentTasks.stream()
+                .map(TaskResponseDto::from)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
 }

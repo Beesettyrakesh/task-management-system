@@ -84,6 +84,15 @@ const Navbar: React.FC = () => {
                         <button
                           onClick={() => {
                             setIsMenuOpen(false);
+                            // TODO: Add settings functionality
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          Settings
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsMenuOpen(false);
                             setShowLogoutConfirm(true);
                           }}
                           className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -163,6 +172,15 @@ const Navbar: React.FC = () => {
                     >
                       Dashboard
                     </Link>
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        // TODO: Add settings functionality
+                      }}
+                      className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                    >
+                      Settings
+                    </button>
                     <button
                       onClick={() => {
                         setIsMenuOpen(false);

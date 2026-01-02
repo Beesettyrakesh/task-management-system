@@ -16,7 +16,7 @@ interface TaskDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   task: Task;
-  onTaskUpdate?: () => void;
+  onTaskUpdate?: (updatedTask?: Task) => void;
 }
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
@@ -35,7 +35,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   };
 
   const handleAttachmentDeleted = () => {
-    // Refresh attachment list and task card - same as upload
     setRefreshTrigger(prev => prev + 1);
     onTaskUpdate?.();
   };
@@ -54,7 +53,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <div className="bg-white rounded-lg max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
         <div className="border-b border-gray-200 p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
@@ -100,7 +98,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             </button>
           </div>
 
-          {/* Tabs */}
           <div className="flex space-x-6">
             <button
               onClick={() => setActiveTab('details')}
@@ -129,11 +126,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           </div>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {activeTab === 'details' && (
             <div className="p-6 space-y-6">
-              {/* Description */}
               {task.description && (
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-3">
@@ -147,7 +142,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 </div>
               )}
 
-              {/* Tags */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-3">Tags</h3>
                 {task.tags && task.tags.length > 0 ? (
@@ -161,7 +155,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 )}
               </div>
 
-              {/* Task Information */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-3">
                   Task Information
@@ -224,7 +217,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
           {activeTab === 'attachments' && (
             <div className="p-6 space-y-6">
-              {/* File Upload Section */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-3">
                   Upload New Files
@@ -235,10 +227,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 />
               </div>
 
-              {/* Divider */}
               <div className="border-t border-gray-200"></div>
 
-              {/* Existing Attachments */}
               <div>
                 <AttachmentList
                   taskId={task.id}
@@ -250,12 +240,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           )}
         </div>
 
-        {/* Footer */}
         <div className="border-t border-gray-200 px-6 py-4">
           <div className="flex justify-between items-center">
-            <div className="text-xs text-gray-500">
-              Task ID: #{task.id}
-            </div>
             <button
               onClick={onClose}
               className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

@@ -1,12 +1,21 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from 'react-hot-toast';
+import { lazy, Suspense } from 'react';
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
-import Signup from "./pages/Signup";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import Layout from "./components/Layout";
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Signup = lazy(() => import("./pages/Signup"));
+const Login = lazy(() => import("./pages/Login"));
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center h-full min-h-96">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <span className="ml-3 text-gray-700">Loading page...</span>
+  </div>
+);
 
 function AppContent() {
   const { loading } = useAuth();
@@ -23,19 +32,21 @@ function AppContent() {
   }
 
   return (
-    <Routes>
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
-      <Route 
-        path="/dashboard" 
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } 
-      />
-      <Route path="/" element={<Login />} />
-    </Routes>
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="/" element={<Login />} />
+      </Routes>
+    </Suspense>
   );
 }
 

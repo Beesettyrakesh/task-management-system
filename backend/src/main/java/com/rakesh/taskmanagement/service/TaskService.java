@@ -1,9 +1,13 @@
 package com.rakesh.taskmanagement.service;
 
+import java.time.LocalDate;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.rakesh.taskmanagement.dto.TaskStatisticsDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -213,5 +217,29 @@ public class TaskService {
         taskRepository.save(task);
     }
 
+    public TaskStatisticsDto getStatistics() {
+        User currentUser = userService.getCurrentUser();
+        Long userId = currentUser.getId();
+
+        Long totalTasks = taskRepository.countByUserId(userId);
+        Long completedTasks = taskRepository.countByUserIdAndStatus(userId, TaskStatus.DONE);
+        Long inProgressTasks = taskRepository.countByUserIdAndStatus(userId, TaskStatus.IN_PROGRESS);
+        Long todoTasks = taskRepository.countByUserIdAndStatus(userId, TaskStatus.TODO);
+        Long overdueTasks = taskRepository.countByUserIdAndDueDateBeforeAndStatusNot(userId, LocalDate.now(), TaskStatus.DONE);
+
+        Map<Priority, Long> priorityStats = new EnumMap<>(Priority.class);
+
+        for(Priority priority: Priority.values()) {
+            priorityStats.put(priority,
+                    taskRepository.countByUserIdAndPriority(userId, priority));
+        }
+
+        return new TaskStatisticsDto(totalTasks, completedTasks, inProgressTasks, todoTasks, overdueTasks, priorityStats);
+    }
+
+    public List<Task> getRecentTasks() {
+        User currentUser = userService.getCurrentUser();
+        return taskRepository.findTop5ByUserIdOrderByCreatedAtDesc(currentUser.getId());
+    }
 
 }

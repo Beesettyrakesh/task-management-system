@@ -115,6 +115,7 @@ export interface LoginFormData {
   password: string;
 }
 
+// Attachment response types
 export interface Attachment {
   id: number;
   originalFileName: string;
@@ -126,12 +127,21 @@ export interface Attachment {
   task: {
     id: number;
     title: string;
-  }
+  };
 }
 
 export interface FileUploadProgress {
   file: File;
   progress: number;
-  status: 'uploading' | 'completed' | 'error';
+  status: "uploading" | "completed" | "error";
   error?: string;
+}
+
+export interface TaskStatistics {
+  totalTasks: number;
+  completedTasks: number;
+  inProgressTasks: number;
+  todoTasks: number;
+  overdueTasks: number;
+  tasksByPriority: Record<Priority, number>;
 }

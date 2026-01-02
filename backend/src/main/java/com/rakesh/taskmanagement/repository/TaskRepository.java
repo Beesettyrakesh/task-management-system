@@ -1,5 +1,6 @@
 package com.rakesh.taskmanagement.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,5 +71,12 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByUserIdAndPriorityOrderByDueDateDesc(Long userId, Priority priority);
     List<Task> findByUserIdAndPriorityOrderByCreatedAtDesc(Long userId, Priority priority);
     List<Task> findByUserIdAndPriorityOrderByCreatedAtAsc(Long userId, Priority priority);
+
+    // Statistics
+    Long countByUserId(Long userId);
+    Long countByUserIdAndStatus(Long userId, TaskStatus status);
+    Long countByUserIdAndPriority(Long userId, Priority priority);
+    Long countByUserIdAndDueDateBeforeAndStatusNot(Long userId, LocalDate date, TaskStatus status);
+    List<Task> findTop5ByUserIdOrderByCreatedAtDesc(Long userId);
 
 }

@@ -29,19 +29,22 @@ const TaskCard: React.FC<TaskCardProps> = ({
   refreshDashboard,
   taskDefaultValues,
 }) => {
+  const [localTask, setLocalTask] = useState<Task>(task);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [attachmentCount, setAttachmentCount] = useState<number>(0);
-  const [loadingAttachments, setLoadingAttachments] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    setLocalTask(task);
+  }, [task]);
+
   const currentStatusOption: SelectOption<TaskStatus> = {
-    value: task.status,
-    label: task.status
+    value: localTask.status,
+    label: localTask.status
       .replace("_", " ")
       .toLowerCase()
       .replace(/\b\w/g, (l) => l.toUpperCase()),
@@ -57,8 +60,17 @@ const TaskCard: React.FC<TaskCardProps> = ({
       .replace(/\b\w/g, (l) => l.toUpperCase()),
   }));
 
-  const handleTaskUpdated = () => {
+  const handleTaskUpdated = (updatedTask?: Task) => {
     setIsCreateModalOpen(false);
+    if (updatedTask) {
+      setLocalTask(updatedTask);
+    }
+    refreshDashboard?.();
+  };
+  const handleDetailTaskUpdate = (updatedTask?: Task) => {
+    if (updatedTask) {
+      setLocalTask(updatedTask);
+    }
     refreshDashboard?.();
   };
 
@@ -105,15 +117,20 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const onsubmit: SubmitHandler<{ status: SelectOption<TaskStatus> }> = async (
     data
   ) => {
+    if (!data.status?.value) return;
+
     setIsUpdating(true);
+    
+    const previousStatus = localTask.status;
+    setLocalTask(prev => ({ ...prev, status: data.status.value }));
 
     try {
       const updatedTask = {
-        title: task.title,
-        description: task.description,
-        dueDate: task.dueDate,
-        priority: task.priority,
-        status: data.status?.value, // Only this changes
+        title: localTask.title,
+        description: localTask.description,
+        dueDate: localTask.dueDate,
+        priority: localTask.priority,
+        status: data.status.value,
       };
 
       await API.put(`/tasks/${task.id}`, updatedTask);
@@ -121,30 +138,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
       setIsStatusDropdownOpen(false);
       toast.success("Task updated successfully!");
     } catch (error: any) {
+      setLocalTask(prev => ({ ...prev, status: previousStatus }));
       toast.error("Failed to update task");
     } finally {
       setIsUpdating(false);
     }
   };
 
-  // Fetch attachment count
-  const fetchAttachmentCount = async () => {
-    try {
-      setLoadingAttachments(true);
-      const response = await API.get(`/tasks/${task.id}/attachments`);
-      setAttachmentCount(response.data.length || 0);
-    } catch (error) {
-      // Silently handle error - attachment count is not critical
-      console.log('Failed to fetch attachment count:', error);
-      setAttachmentCount(0);
-    } finally {
-      setLoadingAttachments(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAttachmentCount();
-  }, [task.id]);
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -163,196 +163,122 @@ const TaskCard: React.FC<TaskCardProps> = ({
     <div
       className={`
         bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200
-        border border-gray-200 p-6
+        border border-gray-200 p-4
         ${getPriorityBorderColor(task.priority)}
       `}
     >
-      <div className="flex justify-between items-start mb-3">
-        <h3 className="text-lg font-semibold text-gray-900 flex-1 mr-3 line-clamp-2">
-          {task.title}
-        </h3>
-        {isStatusDropdownOpen ? (
-          <form onSubmit={handleSubmit(onsubmit)}>
-            <div ref={dropdownRef} className="relative">
-              <Controller
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    options={taskStatusOptions}
-                    placeholder="Change status..."
-                    autoFocus
-                    menuPlacement="auto"
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                    styles={customSelectStyles}
-                    isDisabled={isUpdating}
-                    onChange={(newValue) => {
-                      field.onChange(newValue);
-                      handleSubmit(onsubmit)();
-                    }}
-                  />
-                )}
-              />
+      <div className="flex justify-between items-center">
+        <div className="flex-1 min-w-0 mr-4">
+          <h3 className="text-lg font-semibold text-gray-900 truncate mb-1">
+            {localTask.title}
+          </h3>
+          {localTask.dueDate && (
+            <div className="flex items-center space-x-1">
+              <svg
+                className="w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <span className={getDueDateStyle(localTask.dueDate)}>
+                {formatDueDate(localTask.dueDate)}
+              </span>
             </div>
-          </form>
-        ) : (
+          )}
+        </div>
+
+        <div className="flex items-center space-x-2">
           <button
-            onClick={() => setIsStatusDropdownOpen(true)}
-            className={`
-            group flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium
-            ${getStatusBadgeColor(task.status)}
-            hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer
-            border border-transparent hover:border-white/20
-          `}
+            onClick={() => setIsDetailModalOpen(true)}
+            className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors px-2 py-1 rounded hover:bg-blue-50"
+            title="View details"
           >
-            <span>{formatStatusText(task.status)}</span>
-            <svg
-              className="w-3 h-3 group-hover:rotate-180 transition-transform duration-200"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
+            View
+          </button>
+          
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+            title="Edit task"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </button>
-        )}
-      </div>
 
-      {task.description && (
-        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-          {task.description}
-        </p>
-      )}
-
-      <div className="flex justify-between items-center text-sm">
-        <div className="flex items-center space-x-2">
-          <span className="text-gray-500">Priority:</span>
-          <span
-            className={`font-medium ${getPriorityTextColor(task.priority)}`}
+          <button
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+            title="Delete task"
           >
-            {task.priority}
-          </span>
-        </div>
-
-        {task.dueDate && (
-          <div className="flex items-center space-x-1">
-            <svg
-              className="w-4 h-4 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            <span className={getDueDateStyle(task.dueDate)}>
-              {formatDueDate(task.dueDate)}
-            </span>
-          </div>
-        )}
-      </div>
+          </button>
 
-      {task.tags && task.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2 max-w-full">
-          {task.tags.map((tag) => (
-            <TagBadge
-              key={tag.id}
-              tag={tag}
-              size="sm"
-              className="flex-shrink-0"
+          <div className="relative">
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  value={currentStatusOption}
+                  options={taskStatusOptions}
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                  styles={{
+                    ...customSelectStyles,
+                    control: (provided, state) => ({
+                      ...provided,
+                      minHeight: '32px',
+                      height: '32px',
+                      minWidth: '100px',
+                      fontSize: '12px',
+                      backgroundColor: getStatusBadgeColor(localTask.status).includes('bg-green') ? '#dcfce7' :
+                                     getStatusBadgeColor(localTask.status).includes('bg-yellow') ? '#fef3c7' : '#dbeafe',
+                      border: 'none',
+                      borderRadius: '9999px',
+                      boxShadow: state.isFocused ? '0 0 0 2px rgba(59, 130, 246, 0.5)' : 'none',
+                    }),
+                    valueContainer: (provided) => ({
+                      ...provided,
+                      height: '32px',
+                      padding: '0 8px',
+                    }),
+                    input: (provided) => ({
+                      ...provided,
+                      margin: '0px',
+                    }),
+                    indicatorsContainer: (provided) => ({
+                      ...provided,
+                      height: '32px',
+                    }),
+                    singleValue: (provided) => ({
+                      ...provided,
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: getStatusBadgeColor(localTask.status).includes('bg-green') ? '#166534' :
+                             getStatusBadgeColor(localTask.status).includes('bg-yellow') ? '#92400e' : '#1e40af',
+                    }),
+                  }}
+                  isDisabled={isUpdating}
+                  onChange={(newValue) => {
+                    if (newValue && newValue.value !== localTask.status) {
+                      field.onChange(newValue);
+                      handleSubmit(onsubmit)();
+                    }
+                  }}
+                />
+              )}
             />
-          ))}
-        </div>
-      )}
-
-      {(!task.tags || task.tags.length === 0) && (
-        <div className="text-xs text-gray-400 mb-2">No tags assigned</div>
-      )}
-
-      {/* Attachment count badge */}
-      {!loadingAttachments && attachmentCount > 0 && (
-        <div className="flex items-center justify-start mb-3">
-          <div className="inline-flex items-center space-x-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200">
-            <span className="text-sm">📎</span>
-            <span>{attachmentCount} {attachmentCount === 1 ? 'file' : 'files'}</span>
-          </div>
-        </div>
-      )}
-
-      <div className="mt-3 pt-3 border-t border-gray-100">
-        <div className="flex justify-between items-center">
-          <p className="text-xs text-gray-400">
-            Created{" "}
-            {new Date(task.createdAt).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </p>
-
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setIsDetailModalOpen(true)}
-              className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
-              title="View full details and manage files"
-            >
-              View Details
-            </button>
-            
-            <div className="flex space-x-1">
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                title="Edit task"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-              </button>
-
-              <button
-                onClick={() => setIsDeleteModalOpen(true)}
-                className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                title="Delete task"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -363,13 +289,12 @@ const TaskCard: React.FC<TaskCardProps> = ({
         size="xl"
       >
         <TaskForm
-          taskToEdit={task}
+          taskToEdit={localTask}
           onSuccess={handleTaskUpdated}
           onCancel={() => setIsCreateModalOpen(false)}
         />
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
@@ -449,15 +374,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
         </div>
       </Modal>
 
-      {/* Task Detail Modal with File Management */}
       <TaskDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
-        task={task}
-        onTaskUpdate={() => {
-          fetchAttachmentCount();
-          refreshDashboard?.();
-        }}
+        task={localTask}
+        onTaskUpdate={handleDetailTaskUpdate}
       />
     </div>
   );

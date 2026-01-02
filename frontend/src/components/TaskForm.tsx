@@ -17,7 +17,7 @@ import { convertTaskToFormData, formatTaskForApi } from "../utils/taskUtils";
 import TagSelector from "./TagSelector";
 
 interface TaskFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (updatedTask?: Task) => void;
   onCancel?: () => void;
   taskToEdit?: Task;
   taskDefaultValues?: TaskFormData;
@@ -85,26 +85,21 @@ const TaskForm: React.FC<TaskFormProps> = ({
   }));
 
   const onSubmit: SubmitHandler<TaskFormData> = async (data) => {
-    console.log("=== FORM SUBMIT DEBUG ===");
-    console.log("Form data:", data);
-    console.log("Object.keys(data):", Object.keys(data)); // ← See all properties
-    console.log("data['tags']:", data["tags"]); // ← Try bracket notation
-    console.log("data.tags:", data.tags);
-
     try {
       const taskData = formatTaskForApi(data);
-      console.log("Formatted task data:", taskData);
-      console.log("Formatted task tags:", taskData.tags);
 
+      let updatedTask: Task;
       if (isEditMode && taskToEdit) {
-        await API.put(`/tasks/${taskToEdit.id}`, taskData);
+        const response = await API.put(`/tasks/${taskToEdit.id}`, taskData);
+        updatedTask = response.data;
         toast.success("Task updated successfully!");
       } else {
-        await API.post("/tasks", taskData);
+        const response = await API.post("/tasks", taskData);
+        updatedTask = response.data;
         toast.success("Task created successfully!");
       }
       reset();
-      onSuccess?.();
+      onSuccess?.(updatedTask);
     } catch (error: any) {
       console.error(
         `Error ${isEditMode ? "updating" : "creating"} task:`,

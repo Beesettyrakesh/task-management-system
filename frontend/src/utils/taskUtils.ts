@@ -1,6 +1,5 @@
 import { Priority, Task, TaskFormData, TaskStatus } from "../types";
 
-// Existing utility functions...
 export const getPriorityBadgeColor = (priority: Priority): string => {
   switch (priority) {
     case Priority.LOW:
@@ -58,7 +57,6 @@ export const isOverdue = (dueDateString: string): boolean => {
   return dueDate < today;
 };
 
-// Utility function to convert Task to TaskFormData
 export const convertTaskToFormData = (task: Task): TaskFormData => {
   return {
     title: task.title,
@@ -83,7 +81,6 @@ export const convertTaskToFormData = (task: Task): TaskFormData => {
   };
 };
 
-// Utility function to format form data for API
 export const formatTaskForApi = (data: TaskFormData) => {
   return {
     title: data.title,
@@ -95,9 +92,7 @@ export const formatTaskForApi = (data: TaskFormData) => {
   };
 };
 
-// Additional utility functions for TaskCard
-export const formatDueDate = formatDate; // Alias for backward compatibility
-
+export const formatDueDate = formatDate;
 export const getDueDateStyle = (dateString: string): string => {
   const date = new Date(dateString);
   const today = new Date();
@@ -105,13 +100,13 @@ export const getDueDateStyle = (dateString: string): string => {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   if (diffDays < 0) {
-    return "text-red-600 font-medium"; // Overdue
+    return "text-red-600 font-medium";
   } else if (diffDays === 0) {
-    return "text-orange-600 font-medium"; // Due today
+    return "text-orange-600 font-medium";
   } else if (diffDays === 1) {
-    return "text-yellow-600 font-medium"; // Due tomorrow
+    return "text-yellow-600 font-medium";
   } else {
-    return "text-gray-600"; // Future dates
+    return "text-gray-600";
   }
 };
 

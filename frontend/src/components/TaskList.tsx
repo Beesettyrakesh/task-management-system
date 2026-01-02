@@ -48,7 +48,6 @@ const TaskList: React.FC<TaskListProps> = ({ onSuccess, filters }) => {
     fetchTasks();
   }, [filters]);
 
-  // Loading state with spinner
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -60,7 +59,6 @@ const TaskList: React.FC<TaskListProps> = ({ onSuccess, filters }) => {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="text-center py-12">
@@ -93,7 +91,6 @@ const TaskList: React.FC<TaskListProps> = ({ onSuccess, filters }) => {
     );
   }
 
-  // Empty state
   if (tasks.length === 0) {
     return (
       <div className="text-center py-12">
@@ -125,7 +122,6 @@ const TaskList: React.FC<TaskListProps> = ({ onSuccess, filters }) => {
 
   return (
     <div className="space-y-4">
-      {/* Tasks summary */}
       <div className="flex justify-between items-center text-sm text-gray-600 pb-2">
         <span className="font-medium">
           {tasks.length} task{tasks.length !== 1 ? "s" : ""} total
@@ -141,7 +137,6 @@ const TaskList: React.FC<TaskListProps> = ({ onSuccess, filters }) => {
         </div>
       </div>
 
-      {/* Tasks grid - responsive layout */}
       <div className="grid grid-cols-1 gap-4">
         {tasks.map((task) => (
           <TaskCard key={task.id} task={task} refreshDashboard={onSuccess} />

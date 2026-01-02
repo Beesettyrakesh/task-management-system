@@ -1,5 +1,5 @@
 import { customSelectStyles } from "../utils/selectStyles";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Select from "react-select";
 import { Priority, TaskStatus } from "../types";
 
@@ -43,15 +43,6 @@ const FilterControls: React.FC<FilterControlProps> = ({
   onFiltersChange: onFiltersChange,
   onClearFilters,
 }) => {
-  const [searchTerm, setSearchTerm] = useState(filters.search || "");
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onFiltersChange({ ...filters, search: searchTerm });
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
   const getSelectedOption = (options: any[], value: any) => {
     return options.find((option) => option.value === value) || null;
   };
@@ -59,19 +50,6 @@ const FilterControls: React.FC<FilterControlProps> = ({
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border space-y-4">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter Tasks</h3>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Search
-        </label>
-        <input
-          type="text"
-          placeholder="Search tasks by title or description..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>

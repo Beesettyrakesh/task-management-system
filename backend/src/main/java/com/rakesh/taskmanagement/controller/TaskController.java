@@ -3,7 +3,9 @@ package com.rakesh.taskmanagement.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.rakesh.taskmanagement.dto.TaskRequestDto;
 import com.rakesh.taskmanagement.dto.TaskStatisticsDto;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -35,8 +37,8 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping
-    public ResponseEntity<TaskResponseDto> createTask(@RequestBody Task task) {
-        Task createdTask = taskService.createTask(task);
+    public ResponseEntity<TaskResponseDto> createTask(@Valid @RequestBody TaskRequestDto taskRequestDto) {
+        Task createdTask = taskService.createTask(taskRequestDto);
         TaskResponseDto responseDto = TaskResponseDto.from(createdTask);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
@@ -77,8 +79,8 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TaskResponseDto> updateTask(@PathVariable Long id, @RequestBody Task task) {
-        Task updatedTask = taskService.updateTask(id, task);
+    public ResponseEntity<TaskResponseDto> updateTask(@PathVariable Long id, @Valid @RequestBody TaskRequestDto taskRequestDto) {
+        Task updatedTask = taskService.updateTask(id, taskRequestDto);
         TaskResponseDto responseDto = TaskResponseDto.from(updatedTask);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }

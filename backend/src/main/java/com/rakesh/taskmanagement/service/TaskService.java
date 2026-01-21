@@ -5,21 +5,23 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import com.rakesh.taskmanagement.dto.TaskStatisticsDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.rakesh.taskmanagement.dto.TaskRequestDto;
+import com.rakesh.taskmanagement.dto.TaskStatisticsDto;
 import com.rakesh.taskmanagement.entity.Priority;
 import com.rakesh.taskmanagement.entity.Tag;
 import com.rakesh.taskmanagement.entity.Task;
 import com.rakesh.taskmanagement.entity.TaskStatus;
 import com.rakesh.taskmanagement.entity.User;
+import com.rakesh.taskmanagement.exception.InvalidParameterException;
 import com.rakesh.taskmanagement.exception.ResourceNotFoundException;
 import com.rakesh.taskmanagement.repository.TagRepository;
 import com.rakesh.taskmanagement.repository.TaskRepository;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
@@ -32,10 +34,37 @@ public class TaskService {
     private final TagService tagService;
     private final TagRepository tagRepository;
 
-    // CRUD services
-    public Task createTask(Task task) {
+    private Task convertDtoToEntity(TaskRequestDto dto) {
+        Task task = new Task();
+        task.setTitle(dto.getTitle());
+        task.setDescription(dto.getDescription());
+        task.setStatus(dto.getStatus());
+        task.setPriority(dto.getPriority());
+        task.setDueDate(dto.getDueDate());
+        return task;
+    }
+
+    private void updateTaskFromDto(Task task, TaskRequestDto dto) {
+        task.setTitle(dto.getTitle());
+        task.setDescription(dto.getDescription());
+        task.setStatus(dto.getStatus());
+        task.setPriority(dto.getPriority());
+        task.setDueDate(dto.getDueDate());
+    }
+
+    public Task createTask(TaskRequestDto taskRequestDto) {
+        Task task = convertDtoToEntity(taskRequestDto);
         User currentUser = userService.getCurrentUser();
         task.setUser(currentUser);
+
+        if(taskRequestDto.getDueDate() != null && taskRequestDto.getDueDate().isBefore(LocalDate.now())) {
+            throw new InvalidParameterException("Due date cannot be in the past");
+        }
+
+        if (taskRequestDto.getTagIds() != null && !taskRequestDto.getTagIds().isEmpty()) {
+            List<Tag> tags = tagRepository.findAllById(taskRequestDto.getTagIds());
+            task.setTags(new HashSet<>(tags));
+        }
         return taskRepository.save(task);
     }
 
@@ -56,7 +85,7 @@ public class TaskService {
     }
 
     @Transactional
-    public Task updateTask(Long id, Task task) {
+    public Task updateTask(Long id, @Valid TaskRequestDto task) {
         User currentUser = userService.getCurrentUser();
         Task existingTask = taskRepository
                 .findById(id)
@@ -72,12 +101,8 @@ public class TaskService {
         existingTask.setStatus(task.getStatus());
         existingTask.setDueDate(task.getDueDate());
 
-        if (task.getTags() != null) {
-            List<Long> tagIds = task.getTags().stream()
-                .map(Tag::getId)
-                .collect(Collectors.toList());
-
-            List<Tag> managedTags = tagRepository.findAllById(tagIds);
+        if (task.getTagIds() != null && !task.getTagIds().isEmpty()) {
+            List<Tag> managedTags = tagRepository.findAllById(task.getTagIds());
             existingTask.setTags(new HashSet<>(managedTags));
         } else {
             existingTask.setTags(new HashSet<>());

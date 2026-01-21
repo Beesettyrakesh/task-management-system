@@ -145,3 +145,7 @@ export interface TaskStatistics {
   overdueTasks: number;
   tasksByPriority: Record<Priority, number>;
 }
+
+export interface ValidationError extends Error {
+  fieldErrors?: Record<string, string>;
+}

@@ -64,6 +64,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
     setValue,
     watch,
   } = useForm<TaskFormData>({
+    mode: 'onChange',
     defaultValues: formDefaultValues,
   });
 
@@ -130,11 +131,12 @@ const TaskForm: React.FC<TaskFormProps> = ({
             id="title"
             type="text"
             {...register("title", {
-              required: "Title is required",
+              required: "Task title is required",
               minLength: {
                 value: 3,
                 message: "Title must be at least 3 characters",
               },
+              maxLength: { value: 100, message: 'Title cannot exceed 100 characters' }
             })}
             className={`appearance-none relative block w-full px-3 py-3 border ${
               errors.title ? "border-red-300" : "border-gray-300"

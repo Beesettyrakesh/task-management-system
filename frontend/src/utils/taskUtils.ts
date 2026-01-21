@@ -88,7 +88,7 @@ export const formatTaskForApi = (data: TaskFormData) => {
     dueDate: data.dueDate ? data.dueDate.toISOString().split("T")[0] : null,
     priority: data.priority?.value,
     status: data.status?.value,
-    tags: data.tags || [],
+    tagIds: data.tags?.map(tag => tag.id) || [],
   };
 };
 

@@ -1,12 +1,15 @@
 package com.rakesh.taskmanagement.exception;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.rakesh.taskmanagement.dto.ValidationErrorResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,10 +18,17 @@ import com.rakesh.taskmanagement.dto.ErrorResponseDto;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.web.servlet.View;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    
+
+    private final View error;
+
+    public GlobalExceptionHandler(View error) {
+        this.error = error;
+    }
+
     @ExceptionHandler(InvalidParameterException.class)
     public ResponseEntity<ErrorResponseDto> handleInvalidParameter(InvalidParameterException e) {
         return ResponseEntity.badRequest()
@@ -33,16 +43,18 @@ public class GlobalExceptionHandler {
     
     // Handle @Valid annotation validation errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDto> handleValidationException(MethodArgumentNotValidException ex) {
-        List<String> errors = new ArrayList<>();
-        
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.add(error.getField() + ": " + error.getDefaultMessage());
-        }
-        
-        String errorMessage = String.join(", ", errors);
-        return ResponseEntity.badRequest()
-            .body(new ErrorResponseDto(errorMessage));
+    public ResponseEntity<ValidationErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach( error ->
+                fieldErrors.put(error.getField(), error.getDefaultMessage())
+        );
+
+        ValidationErrorResponse response = new ValidationErrorResponse(
+                "Validation failed", fieldErrors
+        );
+
+        return ResponseEntity.badRequest().body(response);
     }
     
     // Handle constraint violations
@@ -84,5 +96,19 @@ public class GlobalExceptionHandler {
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ErrorResponseDto("An unexpected error occurred"));
+    }
+
+    public ResponseEntity<ErrorResponseDto> handleJsonParseError(HttpMessageNotReadableException ex) {
+        String message = "Invalid data format";
+
+        if(ex.getMessage().contains("Cannot deserialize value of type")) {
+            if(ex.getMessage().contains("TaskStatus")) {
+                message = "Invalid task status. Valid values: TODO, IN_PROGRESS, DONE";
+            } else if (ex.getMessage().contains("Priority")) {
+                message = "Invalid priority. Valid values: LOW, MEDIUM, HIGH";
+            }
+        }
+
+        return ResponseEntity.badRequest().body(new ErrorResponseDto(message));
     }
 }

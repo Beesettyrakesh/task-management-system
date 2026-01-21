@@ -75,9 +75,6 @@ const Dashboard: React.FC = () => {
   };
 
   const handleRefresh = async () => {
-    console.log('🔄 Dashboard refresh triggered at:', new Date().toLocaleTimeString());
-    console.trace('Refresh call stack:'); // This will show what called handleRefresh
-    
     setRefreshTrigger((prev) => prev + 1);
     
     try {
@@ -148,6 +145,7 @@ const Dashboard: React.FC = () => {
                 />
 
                 <TaskList
+                  key={refreshTrigger}
                   onSuccess={handleStatusUpdated}
                   filters={filters}
                 />

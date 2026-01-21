@@ -1,4 +1,4 @@
-import { Task, TaskStatistics } from "@/types";
+import { Task, TaskStatistics, ValidationError } from "@/types";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -25,6 +25,18 @@ API.interceptors.response.use(
       setTimeout(() => {
         window.location.href = "/login";
       }, 1500);
+    }
+    return Promise.reject(error);
+  }
+);
+
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 400 && error.response?.data?.fieldErrors) {
+      const validationError: ValidationError = new Error("Validation failed");
+      validationError.fieldErrors = error.response.data.fieldErrors;
+      return Promise.reject(validationError);
     }
     return Promise.reject(error);
   }

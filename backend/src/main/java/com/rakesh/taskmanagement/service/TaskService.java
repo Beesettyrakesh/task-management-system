@@ -16,7 +16,6 @@ import com.rakesh.taskmanagement.entity.Tag;
 import com.rakesh.taskmanagement.entity.Task;
 import com.rakesh.taskmanagement.entity.TaskStatus;
 import com.rakesh.taskmanagement.entity.User;
-import com.rakesh.taskmanagement.exception.InvalidParameterException;
 import com.rakesh.taskmanagement.exception.ResourceNotFoundException;
 import com.rakesh.taskmanagement.repository.TagRepository;
 import com.rakesh.taskmanagement.repository.TaskRepository;
@@ -44,21 +43,13 @@ public class TaskService {
         return task;
     }
 
-    private void updateTaskFromDto(Task task, TaskRequestDto dto) {
-        task.setTitle(dto.getTitle());
-        task.setDescription(dto.getDescription());
-        task.setStatus(dto.getStatus());
-        task.setPriority(dto.getPriority());
-        task.setDueDate(dto.getDueDate());
-    }
-
     public Task createTask(TaskRequestDto taskRequestDto) {
         Task task = convertDtoToEntity(taskRequestDto);
         User currentUser = userService.getCurrentUser();
         task.setUser(currentUser);
 
         if(taskRequestDto.getDueDate() != null && taskRequestDto.getDueDate().isBefore(LocalDate.now())) {
-            throw new InvalidParameterException("Due date cannot be in the past");
+            throw new IllegalArgumentException("Due date cannot be in the past");
         }
 
         if (taskRequestDto.getTagIds() != null && !taskRequestDto.getTagIds().isEmpty()) {

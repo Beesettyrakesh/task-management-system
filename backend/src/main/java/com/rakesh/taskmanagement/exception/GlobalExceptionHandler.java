@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.rakesh.taskmanagement.dto.ValidationErrorResponse;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,30 +20,20 @@ import com.rakesh.taskmanagement.dto.ErrorResponseDto;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.web.servlet.View;
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
-    private final View error;
-
-    public GlobalExceptionHandler(View error) {
-        this.error = error;
-    }
-
-    @ExceptionHandler(InvalidParameterException.class)
-    public ResponseEntity<ErrorResponseDto> handleInvalidParameter(InvalidParameterException e) {
-        return ResponseEntity.badRequest()
-            .body(new ErrorResponseDto(e.getMessage()));
-    }
     
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleResourceNotFound(ResourceNotFoundException e) {
+        log.warn("Resource not found: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            .body(new ErrorResponseDto(e.getMessage()));
+            .body(new ErrorResponseDto(e.getMessage(), 404));
     }
     
-    // Handle @Valid annotation validation errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new HashMap<>();
@@ -54,10 +46,10 @@ public class GlobalExceptionHandler {
                 "Validation failed", fieldErrors
         );
 
-        return ResponseEntity.badRequest().body(response);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(response);
     }
     
-    // Handle constraint violations
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponseDto> handleConstraintViolation(ConstraintViolationException ex) {
         List<String> errors = new ArrayList<>();
@@ -67,16 +59,14 @@ public class GlobalExceptionHandler {
         }
         
         String errorMessage = String.join(", ", errors);
-        return ResponseEntity.badRequest()
-            .body(new ErrorResponseDto(errorMessage));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponseDto(errorMessage, 400));
     }
     
-    // Handle database constraint violations (fallback)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponseDto> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         String message = "Invalid data provided";
         
-        // Check for common constraint violations
         if (ex.getMessage() != null) {
             if (ex.getMessage().contains("not-null constraint")) {
                 message = "Required field is missing";
@@ -84,20 +74,20 @@ public class GlobalExceptionHandler {
                 message = "Duplicate value not allowed";
             }
         }
-        
-        return ResponseEntity.badRequest()
-            .body(new ErrorResponseDto(message));
+        log.error("Data integrity violation: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponseDto(message, 400));
     }
     
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGenericException(Exception e) {
-        // Log the actual error for debugging (in production, use proper logging)
-        System.err.println("Unhandled exception: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        log.error("Unhandled exception occurred: {}", e.getClass().getSimpleName(), e);
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(new ErrorResponseDto("An unexpected error occurred"));
+            .body(new ErrorResponseDto("An unexpected error occurred", 500));
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponseDto> handleJsonParseError(HttpMessageNotReadableException ex) {
         String message = "Invalid data format";
 
@@ -109,6 +99,20 @@ public class GlobalExceptionHandler {
             }
         }
 
-        return ResponseEntity.badRequest().body(new ErrorResponseDto(message));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponseDto(message));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDto> handleAccessDeniedException(AccessDeniedException ex) {
+        log.warn("Access denied: User attempted unauthorized action - {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(new ErrorResponseDto("Access denied: You don't have permission to perform this action", 403));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponseDto("Invalid argument: " + ex.getMessage(), 400));
     }
 }

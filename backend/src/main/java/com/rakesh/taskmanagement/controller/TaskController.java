@@ -23,7 +23,6 @@ import com.rakesh.taskmanagement.dto.TaskResponseDto;
 import com.rakesh.taskmanagement.entity.Priority;
 import com.rakesh.taskmanagement.entity.Task;
 import com.rakesh.taskmanagement.entity.TaskStatus;
-import com.rakesh.taskmanagement.exception.InvalidParameterException;
 import com.rakesh.taskmanagement.service.TaskService;
 
 import lombok.RequiredArgsConstructor;
@@ -58,7 +57,7 @@ public class TaskController {
                 Priority taskPriority = priority != null ? Priority.valueOf(priority.toUpperCase()) : null;
                 tasks = taskService.getFilteredTasks(taskStatus, taskPriority, sortBy, sortDirection);
             } catch (IllegalArgumentException e) {
-                throw new InvalidParameterException("Invalid status or priority value: " + e.getMessage());
+                throw new IllegalArgumentException("Invalid status or priority value: " + e.getMessage());
             }
         } else {
             tasks = taskService.getAllTasks();

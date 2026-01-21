@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.rakesh.taskmanagement.entity.Tag;
 import com.rakesh.taskmanagement.entity.User;
-import com.rakesh.taskmanagement.exception.InvalidParameterException;
 import com.rakesh.taskmanagement.exception.ResourceNotFoundException;
 import com.rakesh.taskmanagement.repository.TagRepository;
 
@@ -24,7 +23,7 @@ public class TagService {
 
         Optional<Tag> existingTag = tagRepository.findByNameAndUserId(tag.getName(), currentUser.getId());
         if(existingTag.isPresent()){
-            throw new InvalidParameterException("Tag with name '" + tag.getName() + "' already exists");
+            throw new IllegalArgumentException("Tag with name '" + tag.getName() + "' already exists");
         }
 
         tag.setUser(currentUser);
@@ -61,7 +60,7 @@ public class TagService {
         if(!existingTag.getName().equals(tag.getName())) {
             Optional<Tag> duplicateTag = tagRepository.findByNameAndUserId(tag.getName(), currentUser.getId());
             if(duplicateTag.isPresent()){
-                throw new InvalidParameterException("Tag with name '" + tag.getName() + "' already exists");
+                throw new IllegalArgumentException("Tag with name '" + tag.getName() + "' already exists");
             }
         }
 

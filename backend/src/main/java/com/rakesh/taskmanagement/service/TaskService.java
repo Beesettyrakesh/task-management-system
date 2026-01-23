@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskService {
@@ -32,6 +34,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final TagService tagService;
     private final TagRepository tagRepository;
+    private final EmailService emailService;
 
     private Task convertDtoToEntity(TaskRequestDto dto) {
         Task task = new Task();
@@ -56,7 +59,16 @@ public class TaskService {
             List<Tag> tags = tagRepository.findAllById(taskRequestDto.getTagIds());
             task.setTags(new HashSet<>(tags));
         }
-        return taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
+
+        try {
+            emailService.sendTaskCreatedEmail(currentUser, savedTask);
+            log.info("Task created email sent for task: {}", savedTask.getId());
+        } catch (Exception e) {
+            log.error("Failed to send task created email", e);
+        }
+
+        return savedTask;
     }
 
     @Transactional(readOnly = true)

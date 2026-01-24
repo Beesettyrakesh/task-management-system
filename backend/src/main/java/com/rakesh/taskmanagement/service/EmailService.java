@@ -101,7 +101,7 @@ public class EmailService {
                     );
     }
 
-    public void sendTaskRemainderEmail(User user,  Task task) {
+    public void sendTaskReminderEmail(User user,  Task task) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");

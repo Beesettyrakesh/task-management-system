@@ -79,4 +79,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Long countByUserIdAndDueDateBeforeAndStatusNot(Long userId, LocalDate date, TaskStatus status);
     List<Task> findTop5ByUserIdOrderByCreatedAtDesc(Long userId);
 
+    List<Task> findByDueDate(LocalDate dueDate);
+    List<Task> findByDueDateBefore(LocalDate date);
+    List<Task> findByDueDateBetween(LocalDate startDate, LocalDate dueDate);
+
 }

@@ -35,7 +35,9 @@ import com.rakesh.taskmanagement.entity.TaskStatus;
 import com.rakesh.taskmanagement.service.TaskService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/tasks")
 @CrossOrigin(origins = "*")
@@ -59,8 +61,14 @@ public class TaskController {
     @PostMapping
     @SecurityRequirement(name = "JWT")
     public ResponseEntity<TaskResponseDto> createTask(@Valid @RequestBody TaskRequestDto taskRequestDto) {
+        log.info("POST /api/tasks - Create task request: title='{}', priority='{}'", 
+                 taskRequestDto.getTitle(), taskRequestDto.getPriority());
+        
         Task createdTask = taskService.createTask(taskRequestDto);
         TaskResponseDto responseDto = TaskResponseDto.from(createdTask);
+        
+        log.info("POST /api/tasks - Task created successfully with ID: {} - Response: 201 Created", 
+                 createdTask.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
@@ -106,6 +114,9 @@ public class TaskController {
                   schema = @Schema(allowableValues = {"asc", "desc"}))
         @RequestParam(required = false) String sortDirection
     ) {
+        log.info("GET /api/tasks - Retrieve tasks with filters: status='{}', priority='{}', sortBy='{}', sortDirection='{}'", 
+                 status, priority, sortBy, sortDirection);
+        
         List<Task> tasks;
 
         if(status != null || priority != null || sortBy != null || sortDirection != null) {
@@ -113,7 +124,9 @@ public class TaskController {
                 TaskStatus taskStatus = status != null ? TaskStatus.valueOf(status.toUpperCase()) : null;
                 Priority taskPriority = priority != null ? Priority.valueOf(priority.toUpperCase()) : null;
                 tasks = taskService.getFilteredTasks(taskStatus, taskPriority, sortBy, sortDirection);
+                log.debug("GET /api/tasks - Applied filters, found {} filtered tasks", tasks.size());
             } catch (IllegalArgumentException e) {
+                log.warn("GET /api/tasks - Invalid filter parameters: {} - Response: 400 Bad Request", e.getMessage());
                 throw new IllegalArgumentException("Invalid status or priority value: " + e.getMessage());
             }
         } else {
@@ -124,6 +137,7 @@ public class TaskController {
             .map(TaskResponseDto::from)
             .collect(Collectors.toList());
 
+        log.info("GET /api/tasks - Retrieved {} tasks successfully - Response: 200 OK", responseDtos.size());
         return ResponseEntity.ok(responseDtos);
     }
 
@@ -140,8 +154,12 @@ public class TaskController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<TaskResponseDto> getTaskById(@PathVariable Long id) {
+        log.info("GET /api/tasks/{} - Retrieve task by ID", id);
+        
         Task task = taskService.getTaskById(id);
         TaskResponseDto responseDto = TaskResponseDto.from(task);
+        
+        log.info("GET /api/tasks/{} - Task retrieved successfully - Response: 200 OK", id);
         return ResponseEntity.ok(responseDto);
     }
 
@@ -160,8 +178,13 @@ public class TaskController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponseDto> updateTask(@PathVariable Long id, @Valid @RequestBody TaskRequestDto taskRequestDto) {
+        log.info("PUT /api/tasks/{} - Update task request: title='{}', status='{}'", 
+                 id, taskRequestDto.getTitle(), taskRequestDto.getStatus());
+        
         Task updatedTask = taskService.updateTask(id, taskRequestDto);
         TaskResponseDto responseDto = TaskResponseDto.from(updatedTask);
+        
+        log.info("PUT /api/tasks/{} - Task updated successfully - Response: 200 OK", id);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
@@ -177,7 +200,11 @@ public class TaskController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+        log.info("DELETE /api/tasks/{} - Delete task request", id);
+        
         taskService.deleteTask(id);
+        
+        log.info("DELETE /api/tasks/{} - Task deleted successfully - Response: 204 No Content", id);
         return ResponseEntity.noContent().build();
     }
 
@@ -264,7 +291,12 @@ public class TaskController {
     })
     @GetMapping("/statistics")
     public ResponseEntity<TaskStatisticsDto> getTaskStatistics() {
+        log.info("GET /api/tasks/statistics - Task statistics request");
+        
         TaskStatisticsDto taskStatisticsDto = taskService.getStatistics();
+        
+        log.info("GET /api/tasks/statistics - Statistics retrieved: {} total tasks - Response: 200 OK", 
+                 taskStatisticsDto.getTotalTasks());
         return ResponseEntity.ok(taskStatisticsDto);
     }
 

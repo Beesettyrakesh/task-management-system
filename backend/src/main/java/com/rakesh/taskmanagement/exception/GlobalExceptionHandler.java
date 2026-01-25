@@ -36,29 +36,37 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
+        log.warn("Validation error occurred - {} validation failures detected", ex.getBindingResult().getFieldErrorCount());
+        
         Map<String, String> fieldErrors = new HashMap<>();
-
-        ex.getBindingResult().getFieldErrors().forEach( error ->
-                fieldErrors.put(error.getField(), error.getDefaultMessage())
-        );
+        ex.getBindingResult().getFieldErrors().forEach( error -> {
+            fieldErrors.put(error.getField(), error.getDefaultMessage());
+            log.debug("Field validation failed: {} - {}", error.getField(), error.getDefaultMessage());
+        });
 
         ValidationErrorResponse response = new ValidationErrorResponse(
                 "Validation failed", fieldErrors
         );
-
+        
+        log.info("Returning validation error response with {} field errors", fieldErrors.size());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(response);
     }
     
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponseDto> handleConstraintViolation(ConstraintViolationException ex) {
-        List<String> errors = new ArrayList<>();
+        log.warn("Constraint violation occurred - {} violations detected", ex.getConstraintViolations().size());
         
+        List<String> errors = new ArrayList<>();
         for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
-            errors.add(violation.getPropertyPath() + ": " + violation.getMessage());
+            String error = violation.getPropertyPath() + ": " + violation.getMessage();
+            errors.add(error);
+            log.debug("Constraint violation: {}", error);
         }
         
         String errorMessage = String.join(", ", errors);
+        log.info("Returning constraint violation response: {}", errorMessage);
+        
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponseDto(errorMessage, 400));
     }
@@ -89,16 +97,22 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponseDto> handleJsonParseError(HttpMessageNotReadableException ex) {
+        log.warn("JSON parsing error occurred: Invalid data format received");
+        log.debug("JSON parse error details: {}", ex.getMessage());
+        
         String message = "Invalid data format";
 
         if(ex.getMessage().contains("Cannot deserialize value of type")) {
             if(ex.getMessage().contains("TaskStatus")) {
                 message = "Invalid task status. Valid values: TODO, IN_PROGRESS, DONE";
+                log.info("Invalid TaskStatus value provided in request");
             } else if (ex.getMessage().contains("Priority")) {
                 message = "Invalid priority. Valid values: LOW, MEDIUM, HIGH";
+                log.info("Invalid Priority value provided in request");
             }
         }
 
+        log.info("Returning JSON parse error response: {}", message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponseDto(message));
     }
@@ -112,6 +126,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.warn("Invalid argument provided: {}", ex.getMessage());
+        log.debug("IllegalArgumentException details", ex);
+        
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponseDto("Invalid argument: " + ex.getMessage(), 400));
     }

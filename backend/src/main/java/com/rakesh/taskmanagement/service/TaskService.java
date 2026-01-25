@@ -47,25 +47,33 @@ public class TaskService {
     }
 
     public Task createTask(TaskRequestDto taskRequestDto) {
-        Task task = convertDtoToEntity(taskRequestDto);
         User currentUser = userService.getCurrentUser();
+        log.info("Creating new task: '{}' for user: {}", taskRequestDto.getTitle(), currentUser.getUsername());
+        
+        Task task = convertDtoToEntity(taskRequestDto);
         task.setUser(currentUser);
 
         if(taskRequestDto.getDueDate() != null && taskRequestDto.getDueDate().isBefore(LocalDate.now())) {
+            log.warn("Task creation failed: Due date in the past for user: {}, task: '{}'", 
+                     currentUser.getUsername(), taskRequestDto.getTitle());
             throw new IllegalArgumentException("Due date cannot be in the past");
         }
 
         if (taskRequestDto.getTagIds() != null && !taskRequestDto.getTagIds().isEmpty()) {
+            log.debug("Assigning {} tags to new task for user: {}", 
+                     taskRequestDto.getTagIds().size(), currentUser.getUsername());
             List<Tag> tags = tagRepository.findAllById(taskRequestDto.getTagIds());
             task.setTags(new HashSet<>(tags));
         }
+        
         Task savedTask = taskRepository.save(task);
+        log.info("Task created successfully with ID: {} for user: {}", savedTask.getId(), currentUser.getUsername());
 
         try {
             emailService.sendTaskCreatedEmail(currentUser, savedTask);
-            log.info("Task created email sent for task: {}", savedTask.getId());
+            log.info("Task creation email sent for task: {}", savedTask.getId());
         } catch (Exception e) {
-            log.error("Failed to send task created email", e);
+            log.error("Failed to send task created email for task: {} - {}", savedTask.getId(), e.getMessage());
         }
 
         return savedTask;
@@ -74,29 +82,50 @@ public class TaskService {
     @Transactional(readOnly = true)
     public List<Task> getAllTasks() {
         User currentUser = userService.getCurrentUser();
-        return taskRepository.findAllByUserIdWithTags(currentUser.getId());
+        log.debug("Fetching all tasks for user: {}", currentUser.getUsername());
+        
+        List<Task> tasks = taskRepository.findByUserId(currentUser.getId());
+
+        log.info("Found {} tasks for user: {}", tasks.size(), currentUser.getUsername());
+        return tasks;
     }
 
     @Transactional(readOnly = true)
     public Task getTaskById(Long id) {
         User currentUser = userService.getCurrentUser();
+        log.debug("Fetching task ID: {} for user: {}", id, currentUser.getUsername());
+        
         Task task = taskRepository
                 .findByIdAndUserIdWithTags(id, currentUser.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+                .orElseThrow(() -> {
+                    log.warn("Task not found: ID {} requested by user: {}", id, currentUser.getUsername());
+                    return new ResourceNotFoundException("Task not found");
+                });
         
+        log.debug("Task ID: {} found and authorized for user: {}", id, currentUser.getUsername());
         return task;
     }
 
     @Transactional
     public Task updateTask(Long id, @Valid TaskRequestDto task) {
         User currentUser = userService.getCurrentUser();
+        log.info("Updating task with ID: {} for user: {}", id, currentUser.getUsername());
+        
         Task existingTask = taskRepository
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+                .orElseThrow(() -> {
+                    log.warn("Task not found during update: ID {} requested by user: {}", id, currentUser.getUsername());
+                    return new ResourceNotFoundException("Task not found");
+                });
 
-        if(existingTask.getUser().getId() != currentUser.getId()) {
+        if(!existingTask.getUser().getId().equals(currentUser.getId())) {
+            log.warn("Security violation during update: User {} attempted to access task {} owned by {}", 
+                     currentUser.getUsername(), id, existingTask.getUser().getUsername());
             throw new ResourceNotFoundException("Task not found");
         }
+        
+        log.debug("Updating task '{}' with new data: title='{}', status='{}'", 
+                  existingTask.getTitle(), task.getTitle(), task.getStatus());
 
         existingTask.setTitle(task.getTitle());
         existingTask.setDescription(task.getDescription());
@@ -105,22 +134,38 @@ public class TaskService {
         existingTask.setDueDate(task.getDueDate());
 
         if (task.getTagIds() != null && !task.getTagIds().isEmpty()) {
+            log.debug("Updating task tags: {} tags assigned", task.getTagIds().size());
             List<Tag> managedTags = tagRepository.findAllById(task.getTagIds());
             existingTask.setTags(new HashSet<>(managedTags));
         } else {
             existingTask.setTags(new HashSet<>());
         }
-        return taskRepository.save(existingTask);
+        
+        Task updatedTask = taskRepository.save(existingTask);
+        log.info("Task ID: {} updated successfully for user: {}", updatedTask.getId(), currentUser.getUsername());
+        
+        return updatedTask;
     }
 
     public void deleteTask(Long id) {
         User currentUser = userService.getCurrentUser();
+        log.info("Deleting task with ID: {} for user: {}", id, currentUser.getUsername());
+        
         Task task = taskRepository
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
-        if(task.getUser().getId() == currentUser.getId()) {
+                .orElseThrow(() -> {
+                    log.warn("Task not found during deletion: ID {} requested by user: {}", id, currentUser.getUsername());
+                    return new ResourceNotFoundException("Task not found");
+                });
+                
+        if(task.getUser().getId().equals(currentUser.getId())) {
+            log.debug("Deleting task: '{}' (Status: {}, Priority: {})", 
+                      task.getTitle(), task.getStatus(), task.getPriority());
             taskRepository.deleteById(id);
+            log.info("Task ID: {} deleted successfully for user: {}", id, currentUser.getUsername());
         } else  {
+            log.warn("Security violation during deletion: User {} attempted to delete task {} owned by {}", 
+                     currentUser.getUsername(), id, task.getUser().getUsername());
             throw new ResourceNotFoundException("Task not found");
         }
     }

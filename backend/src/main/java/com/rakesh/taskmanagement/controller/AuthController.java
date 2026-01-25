@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,7 @@ import com.rakesh.taskmanagement.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -46,11 +48,18 @@ public class AuthController {
     })
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequestDto signupRequestDto) {
+        log.info("POST /api/auth/signup - Registration request received for username: {}", 
+                 signupRequestDto.getUsername());
+        
         try {
             SignupResponseDto response = userService.signup(signupRequestDto);
+            log.info("POST /api/auth/signup - Registration successful for username: {} - Response: 200 OK", 
+                     signupRequestDto.getUsername());
             return ResponseEntity
                     .ok(response);
         } catch (RuntimeException e) {
+            log.warn("POST /api/auth/signup - Registration failed for username: {} - Error: {} - Response: 400 Bad Request", 
+                     signupRequestDto.getUsername(), e.getMessage());
             return ResponseEntity
                     .badRequest()
                     .body(new ErrorResponseDto(e.getMessage()));
@@ -69,24 +78,41 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
-        return ResponseEntity.ok(userService.login(loginRequestDto));
+        log.info("POST /api/auth/login - Login request received for username: {}", 
+                 loginRequestDto.getUsername());
+        
+        try {
+            LoginResponseDto response = userService.login(loginRequestDto);
+            log.info("POST /api/auth/login - Login successful for username: {} - Response: 200 OK", 
+                     loginRequestDto.getUsername());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.warn("POST /api/auth/login - Login failed for username: {} - Error: {} - Response: 401 Unauthorized", 
+                     loginRequestDto.getUsername(), e.getMessage());
+            throw e;
+        }
     }
 
     @GetMapping("/me")
     public ResponseEntity<LoginResponseDto> getCurrentUser(Authentication authentication) {
+        log.info("GET /api/auth/me - Current user info request");
+        
         try {
             User user = userService.getCurrentUser();
 
             if (user != null) {
+                log.info("GET /api/auth/me - User info retrieved for: {} - Response: 200 OK", user.getUsername());
                 LoginResponseDto userInfo = new LoginResponseDto(
                         null,
                         user.getUsername(),
                         user.getEmail());
                 return ResponseEntity.ok(userInfo);
             } else {
+                log.warn("GET /api/auth/me - User not found - Response: 404 Not Found");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
         } catch (Exception e) {
+            log.error("GET /api/auth/me - Authentication error: {} - Response: 401 Unauthorized", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }

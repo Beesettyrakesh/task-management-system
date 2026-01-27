@@ -7,9 +7,10 @@ import { TaskFilters } from "./FilterControls";
 interface TaskListProps {
   onSuccess?: () => void;
   filters?: TaskFilters;
+  refreshTrigger?: number; // Add back refresh trigger but use it more efficiently
 }
 
-const TaskList: React.FC<TaskListProps> = ({ onSuccess, filters }) => {
+const TaskList: React.FC<TaskListProps> = ({ onSuccess, filters, refreshTrigger }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +47,7 @@ const TaskList: React.FC<TaskListProps> = ({ onSuccess, filters }) => {
       }
     };
     fetchTasks();
-  }, [filters]);
+  }, [filters, refreshTrigger]); // Include refreshTrigger to refresh when tasks are updated
 
   if (loading) {
     return (

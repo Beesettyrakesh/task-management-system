@@ -83,4 +83,33 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByDueDateBefore(LocalDate date);
     List<Task> findByDueDateBetween(LocalDate startDate, LocalDate dueDate);
 
+    // ⚡ QUERY OPTIMIZATION: JOIN FETCH methods to solve N+1 problems
+    
+    @Query("SELECT DISTINCT t FROM Task t JOIN FETCH t.user LEFT JOIN FETCH t.tags WHERE t.user.id = :userId")
+    List<Task> findByUserIdOptimized(@Param("userId") Long userId);
+
+    @Query("SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.tags WHERE t.user.id = :userId ORDER BY t.createdAt DESC LIMIT 5")
+    List<Task> findTop5ByUserIdWithTagsOrderByCreatedAtDesc(@Param("userId") Long userId);
+
+    // ⚡ OPTIMIZED STATISTICS: Single query to replace multiple count queries
+    @Query("""
+        SELECT 
+            COUNT(t.id) as totalTasks,
+            COALESCE(SUM(CASE WHEN t.status = 'DONE' THEN 1 ELSE 0 END), 0) as completedTasks,
+            COALESCE(SUM(CASE WHEN t.status = 'IN_PROGRESS' THEN 1 ELSE 0 END), 0) as inProgressTasks,
+            COALESCE(SUM(CASE WHEN t.status = 'TODO' THEN 1 ELSE 0 END), 0) as todoTasks,
+            COALESCE(SUM(CASE WHEN t.dueDate < :currentDate AND t.status != 'DONE' THEN 1 ELSE 0 END), 0) as overdueTasks
+        FROM Task t 
+        WHERE t.user.id = :userId
+        """)
+    Object[] getTaskStatisticsSummary(@Param("userId") Long userId, @Param("currentDate") LocalDate currentDate);
+
+    @Query("""
+        SELECT t.priority as priority, COUNT(t.id) as count
+        FROM Task t 
+        WHERE t.user.id = :userId 
+        GROUP BY t.priority
+        """)
+    List<Object[]> getPriorityStatistics(@Param("userId") Long userId);
+
 }

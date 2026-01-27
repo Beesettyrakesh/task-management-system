@@ -145,9 +145,9 @@ const Dashboard: React.FC = () => {
                 />
 
                 <TaskList
-                  key={refreshTrigger}
                   onSuccess={handleStatusUpdated}
                   filters={filters}
+                  refreshTrigger={refreshTrigger}
                 />
               </div>
             </div>

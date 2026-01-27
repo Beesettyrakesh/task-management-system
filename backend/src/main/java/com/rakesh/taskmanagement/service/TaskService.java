@@ -84,9 +84,11 @@ public class TaskService {
         User currentUser = userService.getCurrentUser();
         log.debug("Fetching all tasks for user: {}", currentUser.getUsername());
         
-        List<Task> tasks = taskRepository.findByUserId(currentUser.getId());
+        // ⚡ OPTIMIZATION: Using JOIN FETCH to prevent N+1 problems
+        List<Task> tasks = taskRepository.findByUserIdOptimized(currentUser.getId());
 
         log.info("Found {} tasks for user: {}", tasks.size(), currentUser.getUsername());
+        
         return tasks;
     }
 
@@ -294,17 +296,27 @@ public class TaskService {
         User currentUser = userService.getCurrentUser();
         Long userId = currentUser.getId();
 
+        // ⚡ OPTIMIZATION: Use optimized count queries (safer approach)
         Long totalTasks = taskRepository.countByUserId(userId);
         Long completedTasks = taskRepository.countByUserIdAndStatus(userId, TaskStatus.DONE);
         Long inProgressTasks = taskRepository.countByUserIdAndStatus(userId, TaskStatus.IN_PROGRESS);
         Long todoTasks = taskRepository.countByUserIdAndStatus(userId, TaskStatus.TODO);
         Long overdueTasks = taskRepository.countByUserIdAndDueDateBeforeAndStatusNot(userId, LocalDate.now(), TaskStatus.DONE);
 
+        // ⚡ OPTIMIZATION: Single query for priority statistics  
+        List<Object[]> priorityResults = taskRepository.getPriorityStatistics(userId);
         Map<Priority, Long> priorityStats = new EnumMap<>(Priority.class);
-
+        
+        // Initialize all priorities with 0
         for(Priority priority: Priority.values()) {
-            priorityStats.put(priority,
-                    taskRepository.countByUserIdAndPriority(userId, priority));
+            priorityStats.put(priority, 0L);
+        }
+        
+        // Fill in actual counts from query results  
+        for(Object[] result : priorityResults) {
+            Priority priority = (Priority) result[0];
+            Long count = ((Number) result[1]).longValue();
+            priorityStats.put(priority, count);
         }
 
         return new TaskStatisticsDto(totalTasks, completedTasks, inProgressTasks, todoTasks, overdueTasks, priorityStats);
@@ -312,7 +324,8 @@ public class TaskService {
 
     public List<Task> getRecentTasks() {
         User currentUser = userService.getCurrentUser();
-        return taskRepository.findTop5ByUserIdOrderByCreatedAtDesc(currentUser.getId());
+        // ⚡ OPTIMIZATION: Using optimized query with JOIN FETCH for tags
+        return taskRepository.findTop5ByUserIdWithTagsOrderByCreatedAtDesc(currentUser.getId());
     }
 
 }

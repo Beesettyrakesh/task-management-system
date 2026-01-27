@@ -8,7 +8,7 @@ export interface TaskFilters {
   priority?: Priority | null;
   sortBy?: string | null;
   sortDirection?: "asc" | "desc";
-  search?: string;
+  tagName?: string | null;
 }
 
 interface FilterControlProps {
@@ -144,7 +144,7 @@ const FilterControls: React.FC<FilterControlProps> = ({
       {(filters.status ||
         filters.priority ||
         filters.sortBy ||
-        filters.search) && (
+        filters.tagName) && (
         <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
           <span className="font-medium">Active filters: </span>
           {filters.status && (
@@ -158,8 +158,10 @@ const FilterControls: React.FC<FilterControlProps> = ({
               Sort: {filters.sortBy} ({filters.sortDirection})
             </span>
           )}
-          {filters.search && (
-            <span className="mr-2">Search: "{filters.search}"</span>
+          {filters.tagName && (
+            <span className="inline-flex items-center mr-2">
+              Tag: <span className="ml-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-medium">{filters.tagName}</span>
+            </span>
           )}
         </div>
       )}

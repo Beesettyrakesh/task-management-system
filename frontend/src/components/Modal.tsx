@@ -42,19 +42,16 @@ const Modal: React.FC<ModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
         onClick={onClose}
       />
 
-      {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div
           className={`relative w-full ${sizeClasses[size]} transform overflow-visible rounded-lg bg-white shadow-xl transition-all min-h-[600px]`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Close button */}
           <button
             onClick={onClose}
             className="absolute right-4 top-4 z-10 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -74,7 +71,6 @@ const Modal: React.FC<ModalProps> = ({
             </svg>
           </button>
 
-          {/* Content */}
           {children}
         </div>
       </div>

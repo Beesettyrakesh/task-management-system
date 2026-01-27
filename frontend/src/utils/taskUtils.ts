@@ -93,7 +93,12 @@ export const formatTaskForApi = (data: TaskFormData) => {
 };
 
 export const formatDueDate = formatDate;
-export const getDueDateStyle = (dateString: string): string => {
+export const getDueDateStyle = (dateString: string, status?: TaskStatus): string => {
+  // If task is completed, grey out the date
+  if (status === TaskStatus.DONE) {
+    return "text-gray-500";
+  }
+
   const date = new Date(dateString);
   const today = new Date();
   const diffTime = date.getTime() - today.getTime();

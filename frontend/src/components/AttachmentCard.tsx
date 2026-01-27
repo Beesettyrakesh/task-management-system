@@ -1,8 +1,9 @@
 import API from "@/services/api";
 import { Attachment } from "@/types";
 import { useState } from "react";
-import toast from "react-hot-toast";
-import Modal from "./Modal";
+import { showSuccessToast, showErrorToast } from "../config/toastConfig";
+import { ConfirmationModal } from "./ConfirmationModal";
+import { ButtonSpinner } from "./LoadingSpinner";
 
 interface AttachmentCardProps {
   file: Attachment;
@@ -38,10 +39,10 @@ const AttachmentCard: React.FC<AttachmentCardProps> = ({ file, onDelete }) => {
       const response = await API.get(`/attachments/${file.id}/download`);
       const downloadUrl = response.data;
       window.open(downloadUrl, "_blank");
-      toast.success("Download started!");
+      showSuccessToast("Download started!");
     } catch (error) {
       console.error("Failed to download attachment:", error);
-      toast.error("Failed to download attachment. Try again later.");
+      showErrorToast("Failed to download attachment");
     } finally {
       setIsDownloading(false);
     }
@@ -51,12 +52,12 @@ const AttachmentCard: React.FC<AttachmentCardProps> = ({ file, onDelete }) => {
     setIsDeleting(true);
     try {
       await API.delete(`/attachments/${file.id}`);
-      toast.success("Attachment deleted successfully!");
+      showSuccessToast("Attachment deleted successfully!");
       setIsDeleteModalOpen(false);
       onDelete?.(file.id);
     } catch (error) {
       console.error("Failed to delete the attachment:", error);
-      toast.error("Failed to delete the attachment. Try again later.");
+      showErrorToast("Failed to delete attachment");
     } finally {
       setIsDeleting(false);
     }
@@ -101,26 +102,7 @@ const AttachmentCard: React.FC<AttachmentCardProps> = ({ file, onDelete }) => {
           >
             {isDownloading ? (
               <>
-                <svg
-                  className="animate-spin h-4 w-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
+                <ButtonSpinner />
                 <span>Downloading...</span>
               </>
             ) : (
@@ -165,85 +147,16 @@ const AttachmentCard: React.FC<AttachmentCardProps> = ({ file, onDelete }) => {
         </div>
       </div>
 
-      {/* Professional Delete Confirmation Modal */}
-      <Modal
+      <ConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        size="md"
-      >
-        <div className="bg-white p-6 rounded-lg">
-          <div className="flex items-center mb-4">
-            <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-              <svg
-                className="h-6 w-6 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Delete Attachment
-            </h3>
-            <p className="text-sm text-gray-500 mb-6">
-              Are you sure you want to delete "<strong>{file.originalFileName}</strong>"?
-              This action cannot be undone.
-            </p>
-          </div>
-
-          <div className="flex space-x-4">
-            <button
-              onClick={() => setIsDeleteModalOpen(false)}
-              disabled={isDeleting}
-              className="flex-1 bg-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-            >
-              {isDeleting ? (
-                <>
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Deleting...
-                </>
-              ) : (
-                "Delete Attachment"
-              )}
-            </button>
-          </div>
-        </div>
-      </Modal>
+        onConfirm={handleDelete}
+        title="Delete Attachment"
+        message={`Are you sure you want to delete "${file.originalFileName}"? This action cannot be undone.`}
+        confirmText="Delete Attachment"
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </>
   );
 };

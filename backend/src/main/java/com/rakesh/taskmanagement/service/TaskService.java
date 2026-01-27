@@ -205,6 +205,20 @@ public class TaskService {
         return taskRepository.findByUserIdOrderByPriorityDesc(currentUser.getId());
     }
 
+    public List<Task> getTasksByTagName(String tagName) {
+        User currentUser = userService.getCurrentUser();
+        log.info("Filtering tasks by tag: '{}' for user: {}", tagName, currentUser.getUsername());
+        
+        // Two-step approach: First get task IDs matching the tag, then fetch full tasks with all tags
+        List<Long> taskIds = taskRepository.findTaskIdsByUserIdAndTagName(currentUser.getId(), tagName);
+        
+        if (taskIds.isEmpty()) {
+            return List.of();
+        }
+        
+        return taskRepository.findTasksWithAllTagsByIds(taskIds);
+    }
+
     public List<Task> getFilteredTasks(TaskStatus status, Priority priority, String sortBy, String sortDirection) {
         User currentUser = userService.getCurrentUser();
         Long userId = currentUser.getId();

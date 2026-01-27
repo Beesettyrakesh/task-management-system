@@ -19,7 +19,6 @@ const Navbar: React.FC = () => {
       <nav className="bg-white shadow-lg border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            {/* Logo and Brand */}
             <div className="flex items-center">
               <Link
                 to={isAuthenticated ? "/dashboard" : "/"}
@@ -34,18 +33,9 @@ const Navbar: React.FC = () => {
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               {isAuthenticated ? (
                 <>
-                  <Link
-                    to="/dashboard"
-                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                  >
-                    Dashboard
-                  </Link>
-
-                  {/* User Menu */}
                   <div className="relative">
                     <button
                       onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -72,7 +62,6 @@ const Navbar: React.FC = () => {
                       </svg>
                     </button>
 
-                    {/* Dropdown Menu */}
                     {isMenuOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
                         <div className="px-4 py-2 border-b border-gray-100">
@@ -84,7 +73,6 @@ const Navbar: React.FC = () => {
                         <button
                           onClick={() => {
                             setIsMenuOpen(false);
-                            // TODO: Add settings functionality
                           }}
                           className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         >
@@ -121,7 +109,6 @@ const Navbar: React.FC = () => {
               )}
             </div>
 
-            {/* Mobile menu button */}
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -153,7 +140,6 @@ const Navbar: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile Navigation Menu */}
           {isMenuOpen && (
             <div className="md:hidden">
               <div className="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200">
@@ -165,17 +151,9 @@ const Navbar: React.FC = () => {
                       </p>
                       <p className="text-sm text-gray-500">{user?.email}</p>
                     </div>
-                    <Link
-                      to="/dashboard"
-                      className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
                     <button
                       onClick={() => {
                         setIsMenuOpen(false);
-                        // TODO: Add settings functionality
                       }}
                       className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
                     >
@@ -215,7 +193,6 @@ const Navbar: React.FC = () => {
         </div>
       </nav>
 
-      {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">

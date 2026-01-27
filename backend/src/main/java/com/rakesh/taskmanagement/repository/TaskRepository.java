@@ -112,4 +112,11 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
         """)
     List<Object[]> getPriorityStatistics(@Param("userId") Long userId);
 
+    // Tag-based filtering - Two-step approach to fetch all tags for matching tasks
+    @Query("SELECT DISTINCT t.id FROM Task t JOIN t.tags tag WHERE t.user.id = :userId AND tag.name = :tagName")
+    List<Long> findTaskIdsByUserIdAndTagName(@Param("userId") Long userId, @Param("tagName") String tagName);
+    
+    @Query("SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.tags WHERE t.id IN :taskIds")
+    List<Task> findTasksWithAllTagsByIds(@Param("taskIds") List<Long> taskIds);
+
 }

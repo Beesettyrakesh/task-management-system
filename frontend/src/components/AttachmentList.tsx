@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../services/api";
 import { Attachment } from "../types";
-import toast from "react-hot-toast";
+import { showErrorToast } from "../config/toastConfig";
 import AttachmentCard from "./AttachmentCard";
 
 interface AttachmentListProps {
@@ -28,7 +28,7 @@ const AttachmentList: React.FC<AttachmentListProps> = ({
     } catch (error: any) {
       console.error("Failed to fetch attachments:", error);
       setError("Failed to load attachments");
-      toast.error("Failed to load attachments");
+      showErrorToast("Failed to load attachments");
     } finally {
       setLoading(false);
     }

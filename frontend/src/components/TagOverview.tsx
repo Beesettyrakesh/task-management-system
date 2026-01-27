@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Tag } from "../types";
 import API from "../services/api";
-import toast from "react-hot-toast";
+import { showSuccessToast, showErrorToast } from "../config/toastConfig";
+import { ConfirmationModal } from "./ConfirmationModal";
 
 interface TagOverviewProps {
   onTagsChange?: () => void;
+  onTagClick?: (tagName: string) => void;
+  activeTag?: string | null;
 }
 
-const TagOverview: React.FC<TagOverviewProps> = ({ onTagsChange }) => {
+const TagOverview: React.FC<TagOverviewProps> = ({ onTagsChange, onTagClick, activeTag }) => {
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAllModal, setShowAllModal] = useState(false);
@@ -58,13 +61,22 @@ const TagOverview: React.FC<TagOverviewProps> = ({ onTagsChange }) => {
         ) : tags.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
-              <span
+              <button
                 key={tag.id}
-                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+                onClick={() => onTagClick?.(tag.name)}
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white transition-all hover:scale-105 hover:shadow-md ${
+                  activeTag === tag.name ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+                }`}
                 style={{ backgroundColor: tag.color }}
+                title={`Filter by ${tag.name}`}
               >
                 {tag.name}
-              </span>
+                {activeTag === tag.name && (
+                  <svg className="ml-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
             ))}
           </div>
         ) : (
@@ -104,6 +116,11 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState("#3B82F6");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; tag: Tag | null }>({
+    isOpen: false,
+    tag: null,
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -116,7 +133,7 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
       const response = await API.get("/tags");
       setTags(response.data.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name)));
     } catch (error) {
-      toast.error("Failed to fetch tags");
+      showErrorToast("Failed to fetch tags");
     } finally {
       setLoading(false);
     }
@@ -137,24 +154,28 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
       setNewTagColor("#3B82F6");
       fetchTags();
       onTagsChange();
-      toast.success("Tag created successfully");
+      showSuccessToast("Tag created successfully");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to create tag");
+      showErrorToast(error.response?.data?.message || "Failed to create tag");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDeleteTag = async (tagId: number) => {
-    if (!confirm("Are you sure you want to delete this tag?")) return;
+  const handleDeleteTag = async () => {
+    if (!deleteConfirmation.tag) return;
 
+    setIsDeleting(true);
     try {
-      await API.delete(`/tags/${tagId}`);
+      await API.delete(`/tags/${deleteConfirmation.tag.id}`);
       fetchTags();
       onTagsChange();
-      toast.success("Tag deleted successfully");
+      showSuccessToast("Tag deleted successfully");
+      setDeleteConfirmation({ isOpen: false, tag: null });
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to delete tag");
+      showErrorToast(error.response?.data?.message || "Failed to delete tag");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -200,7 +221,7 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
                     <span className="font-medium text-gray-900">{tag.name}</span>
                   </div>
                   <button
-                    onClick={() => handleDeleteTag(tag.id)}
+                    onClick={() => setDeleteConfirmation({ isOpen: true, tag })}
                     className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
                   >
                     Delete
@@ -251,6 +272,17 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
           </form>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={deleteConfirmation.isOpen}
+        onClose={() => setDeleteConfirmation({ isOpen: false, tag: null })}
+        onConfirm={handleDeleteTag}
+        title="Delete Tag"
+        message={`Are you sure you want to delete "${deleteConfirmation.tag?.name}"? This will remove it from all tasks.`}
+        confirmText="Delete Tag"
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 };

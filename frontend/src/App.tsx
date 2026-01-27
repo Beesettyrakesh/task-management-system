@@ -5,30 +5,19 @@ import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
 import ProtectedRoute from "./components/ProtectedRoutes";
 import Layout from "./components/Layout";
+import { LoadingPage } from "./components/LoadingSpinner";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Signup = lazy(() => import("./pages/Signup"));
 const Login = lazy(() => import("./pages/Login"));
 
-const PageLoader = () => (
-  <div className="flex items-center justify-center h-full min-h-96">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-    <span className="ml-3 text-gray-700">Loading page...</span>
-  </div>
-);
+const PageLoader = () => <LoadingPage text="Loading page..." />;
 
 function AppContent() {
   const { loading } = useAuth();
 
   if (loading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-lg text-gray-700">Loading...</span>
-        </div>
-      </Layout>
-    );
+    return <LoadingPage />;
   }
 
   return (
@@ -55,30 +44,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppContent />
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#363636',
-              color: '#fff',
-            },
-            success: {
-              duration: 3000,
-              style: {
-                background: '#10B981',
-                color: '#fff',
-              },
-            },
-            error: {
-              duration: 5000,
-              style: {
-                background: '#EF4444',
-                color: '#fff',
-              },
-            },
-          }}
-        />
+        <Toaster position="top-right" />
       </AuthProvider>
     </BrowserRouter>
   );

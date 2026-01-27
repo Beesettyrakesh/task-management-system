@@ -1,10 +1,11 @@
 import { SignupFormData } from "@/types";
 import { SubmitHandler, useForm } from "react-hook-form";
-import toast from 'react-hot-toast';
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { useAuth } from "../hooks/useAuth";
 import { useEffect } from "react";
+import { ButtonSpinner } from "../components/LoadingSpinner";
+import { showSuccessToast, showErrorToast } from "../config/toastConfig";
 
 const Signup: React.FC = () => {
   const { signup, authLoading, loading, isAuthenticated } = useAuth();
@@ -28,10 +29,10 @@ const Signup: React.FC = () => {
 
     if (result.success) {
       reset();
-      toast.success("Account created successfully! Please sign in.");
+      showSuccessToast("Account created successfully! Please sign in.");
       setTimeout(() => navigate("/login"), 2000);
     } else {
-      toast.error(result.error || "Signup failed");
+      showErrorToast(result.error || "Signup failed");
     }
   };
 
@@ -151,8 +152,8 @@ const Signup: React.FC = () => {
                 >
                   {isSubmitting || authLoading ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creating account...
+                      <ButtonSpinner />
+                      <span className="ml-2">Creating account...</span>
                     </>
                   ) : (
                     <>

@@ -112,14 +112,21 @@ public class TaskController {
         
         @Parameter(description = "Sort direction", example = "asc",
                   schema = @Schema(allowableValues = {"asc", "desc"}))
-        @RequestParam(required = false) String sortDirection
+        @RequestParam(required = false) String sortDirection,
+        
+        @Parameter(description = "Filter tasks by tag name", example = "frontend")
+        @RequestParam(required = false) String tagName
     ) {
-        log.info("GET /api/tasks - Retrieve tasks with filters: status='{}', priority='{}', sortBy='{}', sortDirection='{}'", 
-                 status, priority, sortBy, sortDirection);
+        log.info("GET /api/tasks - Retrieve tasks with filters: status='{}', priority='{}', sortBy='{}', sortDirection='{}', tagName='{}'", 
+                 status, priority, sortBy, sortDirection, tagName);
         
         List<Task> tasks;
 
-        if(status != null || priority != null || sortBy != null || sortDirection != null) {
+        // Priority: Tag filtering takes precedence if provided
+        if (tagName != null && !tagName.trim().isEmpty()) {
+            tasks = taskService.getTasksByTagName(tagName.trim());
+            log.debug("GET /api/tasks - Filtered by tag '{}', found {} tasks", tagName, tasks.size());
+        } else if(status != null || priority != null || sortBy != null || sortDirection != null) {
             try {
                 TaskStatus taskStatus = status != null ? TaskStatus.valueOf(status.toUpperCase()) : null;
                 Priority taskPriority = priority != null ? Priority.valueOf(priority.toUpperCase()) : null;

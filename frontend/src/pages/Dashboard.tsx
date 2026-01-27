@@ -7,7 +7,6 @@ import TaskList from "../components/TaskList";
 import StatisticsOverview from "../components/StatisticsOverview";
 import PriorityChart from "../components/PriorityChart";
 import TagOverview from "../components/TagOverview";
-import SearchBar from "../components/SearchBar";
 import { useAuth } from "../hooks/useAuth";
 import {
   Priority,
@@ -67,11 +66,16 @@ const Dashboard: React.FC = () => {
   };
 
   const handleClearFilters = () => {
-    setFilters({ sortDirection: "asc" });
+    setFilters({ sortDirection: "asc", tagName: null });
   };
 
-  const handleSearchChange = (search: string) => {
-    setFilters({ ...filters, search });
+  const handleTagClick = (tagName: string) => {
+    // Toggle tag filter - if clicking active tag, clear it
+    if (filters.tagName === tagName) {
+      setFilters({ ...filters, tagName: null });
+    } else {
+      setFilters({ ...filters, tagName });
+    }
   };
 
   const handleRefresh = async () => {
@@ -154,13 +158,11 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            <SearchBar
-              searchValue={filters.search || ""}
-              onSearchChange={handleSearchChange}
-              placeholder="Search tasks..."
+            <TagOverview 
+              onTagsChange={handleRefresh}
+              onTagClick={handleTagClick}
+              activeTag={filters.tagName || null}
             />
-
-            <TagOverview onTagsChange={handleRefresh} />
 
             {statistics ? (
               <StatisticsOverview statistics={statistics} />

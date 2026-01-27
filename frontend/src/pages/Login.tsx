@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import Layout from "../components/Layout";
+import { ButtonSpinner } from "../components/LoadingSpinner";
+import { showSuccessToast, showErrorToast } from "../config/toastConfig";
 
 function Login() {
   const { login, authLoading, isAuthenticated, loading } = useAuth();
@@ -32,7 +34,9 @@ function Login() {
       reset();
       navigate("/dashboard");
     } else {
-      setLoginError(result.error || "Login failed");
+      const errorMessage = result.error || "Login failed";
+      setLoginError(errorMessage);
+      showErrorToast(errorMessage);
     }
   };
 
@@ -126,8 +130,8 @@ function Login() {
                 >
                   {isSubmitting || authLoading ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Signing in...
+                      <ButtonSpinner />
+                      <span className="ml-2">Signing in...</span>
                     </>
                   ) : (
                     <>

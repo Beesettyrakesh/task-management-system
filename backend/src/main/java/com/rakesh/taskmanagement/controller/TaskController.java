@@ -3,9 +3,7 @@ package com.rakesh.taskmanagement.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.rakesh.taskmanagement.dto.ErrorResponseDto;
-import com.rakesh.taskmanagement.dto.TaskRequestDto;
-import com.rakesh.taskmanagement.dto.TaskStatisticsDto;
+import com.rakesh.taskmanagement.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +13,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rakesh.taskmanagement.dto.TaskResponseDto;
 import com.rakesh.taskmanagement.entity.Priority;
 import com.rakesh.taskmanagement.entity.Task;
 import com.rakesh.taskmanagement.entity.TaskStatus;
@@ -74,20 +75,24 @@ public class TaskController {
 
     @Operation(
             summary = "Get all tasks with optional filtering and sorting",
-            description = "Retrieve user's tasks with flexible filtering and sorting options.\n\n" +
-                         "**All parameters are optional:**\n" +
-                         "• No parameters → Returns all user's tasks\n" +
-                         "• Single filter → ?status=TODO (only TODO tasks)\n" +
-                         "• Multiple filters → ?status=TODO&priority=HIGH&sortBy=dueDate&sortDirection=asc\n\n" +
-                         "**Available Filter Options:**\n" +
-                         "• Filter by status: TODO, IN_PROGRESS, DONE\n" +
-                         "• Filter by priority: LOW, MEDIUM, HIGH\n" +
-                         "• Sort by: dueDate, priority, createdAt\n" +
-                         "• Sort direction: asc (ascending), desc (descending)\n\n" +
-                         "**Examples:**\n" +
-                         "• `/api/tasks` → All tasks\n" +
-                         "• `/api/tasks?status=TODO` → Only TODO tasks\n" +
-                         "• `/api/tasks?priority=HIGH&sortBy=dueDate` → High priority tasks sorted by due date"
+            description = """
+                    Retrieve user's tasks with flexible filtering and sorting options.
+                    
+                    **All parameters are optional:**
+                    • No parameters → Returns all user's tasks
+                    • Single filter → ?status=TODO (only TODO tasks)
+                    • Multiple filters → ?status=TODO&priority=HIGH&sortBy=dueDate&sortDirection=asc
+                    
+                    **Available Filter Options:**
+                    • Filter by status: TODO, IN_PROGRESS, DONE
+                    • Filter by priority: LOW, MEDIUM, HIGH
+                    • Sort by: dueDate, priority, createdAt
+                    • Sort direction: asc (ascending), desc (descending)
+                    
+                    **Examples:**
+                    • `/api/tasks` → All tasks
+                    • `/api/tasks?status=TODO` → Only TODO tasks
+                    • `/api/tasks?priority=HIGH&sortBy=dueDate` → High priority tasks sorted by due date"""
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tasks retrieved successfully",
@@ -97,14 +102,14 @@ public class TaskController {
             @ApiResponse(responseCode = "401", description = "JWT token required")
     })
     @GetMapping
-    public ResponseEntity<List<TaskResponseDto>> getAllTasks(
+    public ResponseEntity<?> getAllTasks(
         @Parameter(description = "Filter tasks by status", example = "TODO",
                   schema = @Schema(allowableValues = {"TODO", "IN_PROGRESS", "DONE"}))
-        @RequestParam(required = false) String status,
+        @RequestParam(required = false) TaskStatus status,
         
         @Parameter(description = "Filter tasks by priority level", example = "HIGH",
                   schema = @Schema(allowableValues = {"LOW", "MEDIUM", "HIGH"}))
-        @RequestParam(required = false) String priority,
+        @RequestParam(required = false) Priority priority,
         
         @Parameter(description = "Sort tasks by field", example = "dueDate",
                   schema = @Schema(allowableValues = {"dueDate", "priority", "createdAt"}))
@@ -115,37 +120,80 @@ public class TaskController {
         @RequestParam(required = false) String sortDirection,
         
         @Parameter(description = "Filter tasks by tag name", example = "frontend")
-        @RequestParam(required = false) String tagName
-    ) {
-        log.info("GET /api/tasks - Retrieve tasks with filters: status='{}', priority='{}', sortBy='{}', sortDirection='{}', tagName='{}'", 
-                 status, priority, sortBy, sortDirection, tagName);
-        
-        List<Task> tasks;
+        @RequestParam(required = false) String tagName,
 
-        // Priority: Tag filtering takes precedence if provided
-        if (tagName != null && !tagName.trim().isEmpty()) {
-            tasks = taskService.getTasksByTagName(tagName.trim());
-            log.debug("GET /api/tasks - Filtered by tag '{}', found {} tasks", tagName, tasks.size());
-        } else if(status != null || priority != null || sortBy != null || sortDirection != null) {
-            try {
-                TaskStatus taskStatus = status != null ? TaskStatus.valueOf(status.toUpperCase()) : null;
-                Priority taskPriority = priority != null ? Priority.valueOf(priority.toUpperCase()) : null;
-                tasks = taskService.getFilteredTasks(taskStatus, taskPriority, sortBy, sortDirection);
-                log.debug("GET /api/tasks - Applied filters, found {} filtered tasks", tasks.size());
-            } catch (IllegalArgumentException e) {
-                log.warn("GET /api/tasks - Invalid filter parameters: {} - Response: 400 Bad Request", e.getMessage());
-                throw new IllegalArgumentException("Invalid status or priority value: " + e.getMessage());
-            }
-        } else {
-            tasks = taskService.getAllTasks();
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
+    ) {
+        Sort sort = Sort.unsorted();
+
+        if(sortBy != null && !sortBy.isEmpty()) {
+            sort = "desc".equalsIgnoreCase(sortDirection)
+                    ? Sort.by(sortBy).descending()
+                    : Sort.by(sortBy).ascending();
         }
 
-        List<TaskResponseDto> responseDtos = tasks.stream()
-            .map(TaskResponseDto::from)
-            .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        log.info("GET /api/tasks - Retrieved {} tasks successfully - Response: 200 OK", responseDtos.size());
-        return ResponseEntity.ok(responseDtos);
+        Page<Task> taskPage = taskService.getFilteredTasksPageable(
+                status,
+                priority,
+                tagName,
+                pageable
+        );
+
+        Page<TaskResponseDto> responsePage = taskPage.map(task -> {
+            TaskResponseDto dto = new TaskResponseDto();
+            dto.setId(task.getId());
+            dto.setTitle(task.getTitle());
+            dto.setDescription(task.getDescription());
+            dto.setStatus(task.getStatus());
+            dto.setPriority(task.getPriority());
+            dto.setDueDate(task.getDueDate());
+            dto.setCreatedAt(task.getCreatedAt());
+            dto.setUpdatedAt(task.getUpdatedAt());
+            dto.setTags(task.getTags().stream()
+                    .map(tag -> {
+                        TagResponseDto tagResponseDto = new TagResponseDto();
+                        tagResponseDto.setId(tag.getId());
+                        tagResponseDto.setName(tag.getName());
+                        tagResponseDto.setColor(tag.getColor());
+                        return tagResponseDto;
+                    })
+                    .toList());
+            return dto;
+        });
+
+        return ResponseEntity.ok(responsePage);
+//        log.info("GET /api/tasks - Retrieve tasks with filters: status='{}', priority='{}', sortBy='{}', sortDirection='{}', tagName='{}'",
+//                 status, priority, sortBy, sortDirection, tagName);
+//
+//        List<Task> tasks;
+//
+//        // Priority: Tag filtering takes precedence if provided
+//        if (tagName != null && !tagName.trim().isEmpty()) {
+//            tasks = taskService.getTasksByTagName(tagName.trim());
+//            log.debug("GET /api/tasks - Filtered by tag '{}', found {} tasks", tagName, tasks.size());
+//        } else if(status != null || priority != null || sortBy != null || sortDirection != null) {
+//            try {
+//                TaskStatus taskStatus = status != null ? TaskStatus.valueOf(status.toUpperCase()) : null;
+//                Priority taskPriority = priority != null ? Priority.valueOf(priority.toUpperCase()) : null;
+//                tasks = taskService.getFilteredTasks(taskStatus, taskPriority, sortBy, sortDirection);
+//                log.debug("GET /api/tasks - Applied filters, found {} filtered tasks", tasks.size());
+//            } catch (IllegalArgumentException e) {
+//                log.warn("GET /api/tasks - Invalid filter parameters: {} - Response: 400 Bad Request", e.getMessage());
+//                throw new IllegalArgumentException("Invalid status or priority value: " + e.getMessage());
+//            }
+//        } else {
+//            tasks = taskService.getAllTasks();
+//        }
+//
+//        List<TaskResponseDto> responseDtos = tasks.stream()
+//            .map(TaskResponseDto::from)
+//            .collect(Collectors.toList());
+//
+//        log.info("GET /api/tasks - Retrieved {} tasks successfully - Response: 200 OK", responseDtos.size());
+//        return ResponseEntity.ok(responseDtos);
     }
 
     @Operation(

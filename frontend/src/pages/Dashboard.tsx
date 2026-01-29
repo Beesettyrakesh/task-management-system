@@ -70,7 +70,6 @@ const Dashboard: React.FC = () => {
   };
 
   const handleTagClick = (tagName: string) => {
-    // Toggle tag filter - if clicking active tag, clear it
     if (filters.tagName === tagName) {
       setFilters({ ...filters, tagName: null });
     } else {

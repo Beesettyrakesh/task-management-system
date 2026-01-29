@@ -317,4 +317,4 @@ const TaskCard: React.FC<TaskCardProps> = ({
   );
 };
 
-export default TaskCard;
+export default React.memo(TaskCard);

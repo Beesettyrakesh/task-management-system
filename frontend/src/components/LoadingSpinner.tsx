@@ -1,33 +1,39 @@
-import React from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from "lucide-react";
+import React from "react";
 
 interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   className?: string;
   text?: string;
+  fullScreen?: boolean;
 }
 
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
-  size = 'md', 
-  className = '',
-  text
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = "md",
+  className = "",
+  text,
+  fullScreen = false,
 }) => {
   const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8'
+    sm: "w-4 h-4",
+    md: "w-6 h-6",
+    lg: "w-8 h-8",
   };
 
-  return (
-    <div className="flex items-center justify-center gap-2">
-      <Loader2 className={`animate-spin ${sizeClasses[size]} ${className}`} />
-      {text && <span className="text-sm text-gray-600">{text}</span>}
-    </div>
-  );
+  if (fullScreen) {
+    return (
+      <div className="flex items-center justify-center gap-2">
+        <Loader2 className={`animate-spin ${sizeClasses[size]} ${className}`} />
+        {text && <span className="text-sm text-gray-600">{text}</span>}
+      </div>
+    );
+  }
 };
 
 // Full page loading spinner
-export const LoadingPage: React.FC<{ text?: string }> = ({ text = 'Loading...' }) => {
+export const LoadingPage: React.FC<{ text?: string }> = ({
+  text = "Loading...",
+}) => {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">

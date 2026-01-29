@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableArgumentResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +39,7 @@ public class TaskService {
     private final TagService tagService;
     private final TagRepository tagRepository;
     private final EmailService emailService;
+    private final PageableArgumentResolver pageableArgumentResolver;
 
     private Task convertDtoToEntity(TaskRequestDto dto) {
         Task task = new Task();
@@ -286,6 +291,54 @@ public class TaskService {
         }
         
         return getAllTasks();
+    }
+
+    public Page<Task> getFilteredTasksPageable(
+            TaskStatus status,
+            Priority priority,
+            String tagName,
+            Pageable pageable
+    ) {
+        User currentUser = userService.getCurrentUser();
+        Long userId = currentUser.getId();
+
+        if(tagName != null && !tagName.trim().isEmpty()){
+            List<Long> taskIds = taskRepository.findTaskIdsByUserIdAndTagName(userId, tagName);
+
+            if(taskIds.isEmpty()) {
+                return Page.empty(pageable);
+            }
+
+            List<Task> tasks = taskRepository.findTasksWithAllTagsByIds(taskIds);
+
+            if(status != null) {
+                tasks = tasks.stream()
+                        .filter(task -> task.getStatus() == status)
+                        .toList();
+            }
+
+            if(priority != null) {
+                tasks = tasks.stream()
+                        .filter(task -> task.getPriority() == priority)
+                        .toList();
+            }
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min((start + pageable.getPageSize()), tasks.size());
+            List<Task> pageContent = tasks.subList(start, end);
+
+            return new PageImpl<>(pageContent, pageable, tasks.size());
+        }
+
+        if(status != null && priority != null) {
+            return taskRepository.findByUserIdAndStatusAndPriority(userId, status, priority,  pageable);
+        } else if(status != null) {
+            return taskRepository.findByUserIdAndStatus(userId, status, pageable);
+        } else if (priority != null) {
+            return taskRepository.findByUserIdAndPriority(userId, priority, pageable);
+        }
+
+        return taskRepository.findByUserId(userId, pageable);
     }
 
     @Transactional

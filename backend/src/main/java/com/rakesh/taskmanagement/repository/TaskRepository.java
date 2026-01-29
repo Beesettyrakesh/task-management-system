@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -119,4 +121,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query("SELECT DISTINCT t FROM Task t LEFT JOIN FETCH t.tags WHERE t.id IN :taskIds")
     List<Task> findTasksWithAllTagsByIds(@Param("taskIds") List<Long> taskIds);
 
+    Page<Task> findByUserId(Long userId, Pageable pageable);
+    Page<Task> findByUserIdAndStatus(Long userId, TaskStatus status, Pageable pageable);
+    Page<Task> findByUserIdAndPriority(Long userId, Priority priority, Pageable pageable);
+    Page<Task> findByUserIdAndStatusAndPriority(Long userId, TaskStatus status, Priority priority, Pageable pageable);
 }

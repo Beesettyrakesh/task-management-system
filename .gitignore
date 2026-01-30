@@ -48,6 +48,7 @@ target/
 .env.production.local
 .env.development
 .env.production
+backend/.env
 !.env.example
 
 # Spring Boot
@@ -127,11 +128,6 @@ coverage
 *.db
 *.sqlite
 *.sqlite3
-
-# Docker
-.dockerignore
-Dockerfile*
-docker-compose*
 
 # Deployment
 .vercel

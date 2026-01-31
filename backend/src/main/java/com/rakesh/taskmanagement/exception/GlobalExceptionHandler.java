@@ -5,18 +5,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.rakesh.taskmanagement.dto.ValidationErrorResponse;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.rakesh.taskmanagement.dto.ErrorResponseDto;
+import com.rakesh.taskmanagement.dto.ValidationErrorResponse;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -131,5 +132,20 @@ public class GlobalExceptionHandler {
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponseDto("Invalid argument: " + ex.getMessage(), 400));
+    }
+
+    @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
+    public ResponseEntity<ErrorResponseDto> handleAuthenticationException(Exception ex) {
+        log.warn("Authentication failed: {}", ex.getMessage());
+        log.debug("Authentication exception details", ex);
+    
+        String message = "Invalid username/email or password";
+
+        if(ex.getMessage() != null && ex.getMessage().contains("not found")) {
+            message = ex.getMessage();
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(new ErrorResponseDto(message, 401));
     }
 }

@@ -1,11 +1,11 @@
 import { SignupFormData } from "@/types";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
-import { useAuth } from "../hooks/useAuth";
-import { useEffect } from "react";
 import { ButtonSpinner } from "../components/LoadingSpinner";
-import { showSuccessToast, showErrorToast } from "../config/toastConfig";
+import { showErrorToast, showSuccessToast } from "../config/toastConfig";
+import { useAuth } from "../hooks/useAuth";
 
 const Signup: React.FC = () => {
   const { signup, authLoading, loading, isAuthenticated } = useAuth();
@@ -18,11 +18,16 @@ const Signup: React.FC = () => {
     reset,
   } = useForm<SignupFormData>();
 
-    useEffect(() => {
-      if(!loading && isAuthenticated) {
-        navigate('/dashboard', { replace: true });
-      }
-    }, [isAuthenticated, loading, navigate]);
+  const [fieldErrors, setFieldErrors] = useState<{
+    username?: string;
+    email?: string;
+  }>({});
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate]);
 
   const onSubmit: SubmitHandler<SignupFormData> = async (data) => {
     const result = await signup(data);
@@ -32,7 +37,22 @@ const Signup: React.FC = () => {
       showSuccessToast("Account created successfully! Please sign in.");
       setTimeout(() => navigate("/login"), 2000);
     } else {
-      showErrorToast(result.error || "Signup failed");
+      const errorMessage = result.error || "Signup failed";
+      setFieldErrors({});
+
+      if (
+        errorMessage.toLowerCase().includes("username") &&
+        (errorMessage.includes("taken") || errorMessage.includes("exists"))
+      ) {
+        setFieldErrors({ username: errorMessage });
+      } else if (
+        errorMessage.toLocaleLowerCase().includes("email") &&
+        (errorMessage.includes("registered") || errorMessage.includes("exists"))
+      ) {
+        setFieldErrors({ email: errorMessage });
+      } else {
+        showErrorToast(errorMessage);
+      }
     }
   };
 
@@ -45,9 +65,7 @@ const Signup: React.FC = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               Create your account
             </h2>
-            <p className="text-gray-600">
-              Get started with TaskManager today
-            </p>
+            <p className="text-gray-600">Get started with TaskManager today</p>
           </div>
 
           {/* Signup Form */}
@@ -55,7 +73,10 @@ const Signup: React.FC = () => {
             <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
               {/* Username Field */}
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Username
                 </label>
                 <input
@@ -69,23 +90,36 @@ const Signup: React.FC = () => {
                     },
                   })}
                   className={`appearance-none relative block w-full px-3 py-3 border ${
-                    errors.username ? 'border-red-300' : 'border-gray-300'
+                    errors.username ? "border-red-300" : "border-gray-300"
                   } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 transition-colors`}
                   placeholder="Choose a username"
                 />
-                {errors.username && (
+                {(errors.username || fieldErrors.username) && (
                   <p className="mt-2 text-sm text-red-600 flex items-center">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-4 h-4 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
-                    {errors.username.message}
+                    {errors.username?.message || fieldErrors.username}
                   </p>
                 )}
               </div>
 
               {/* Email Field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Email Address
                 </label>
                 <input
@@ -99,23 +133,36 @@ const Signup: React.FC = () => {
                     },
                   })}
                   className={`appearance-none relative block w-full px-3 py-3 border ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
+                    errors.email ? "border-red-300" : "border-gray-300"
                   } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 transition-colors`}
                   placeholder="Enter your email address"
                 />
-                {errors.email && (
+                {(errors.email || fieldErrors.email) && (
                   <p className="mt-2 text-sm text-red-600 flex items-center">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-4 h-4 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
-                    {errors.email.message}
+                    {errors.email?.message || fieldErrors.email}
                   </p>
                 )}
               </div>
 
               {/* Password Field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Password
                 </label>
                 <input
@@ -129,14 +176,24 @@ const Signup: React.FC = () => {
                     },
                   })}
                   className={`appearance-none relative block w-full px-3 py-3 border ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
+                    errors.password ? "border-red-300" : "border-gray-300"
                   } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 transition-colors`}
                   placeholder="Create a secure password"
                 />
                 {errors.password && (
                   <p className="mt-2 text-sm text-red-600 flex items-center">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-4 h-4 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                     {errors.password.message}
                   </p>
@@ -157,8 +214,18 @@ const Signup: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                      <svg
+                        className="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                        />
                       </svg>
                       Create account
                     </>
@@ -170,7 +237,7 @@ const Signup: React.FC = () => {
             {/* Sign in link */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <Link
                   to="/login"
                   className="font-medium text-blue-600 hover:text-blue-500 transition-colors"

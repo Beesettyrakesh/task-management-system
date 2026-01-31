@@ -56,7 +56,7 @@ function Login() {
 
           {/* Login Form */}
           <div className="bg-white py-8 px-6 shadow-lg rounded-lg border border-gray-200">
-            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
               {/* Error Message */}
               {loginError && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
@@ -72,18 +72,18 @@ function Login() {
               {/* Username Field */}
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                  Username
+                  Username or Email
                 </label>
                 <input
                   id="username"
                   type="text"
                   {...register("username", {
-                    required: "Username is required",
+                    required: "Username or email is required",
                   })}
                   className={`appearance-none relative block w-full px-3 py-3 border ${
                     errors.username ? 'border-red-300' : 'border-gray-300'
                   } placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 transition-colors`}
-                  placeholder="Enter your username"
+                  placeholder="Enter your username or email"
                 />
                 {errors.username && (
                   <p className="mt-2 text-sm text-red-600 flex items-center">

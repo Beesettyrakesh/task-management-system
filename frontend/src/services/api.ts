@@ -2,8 +2,8 @@ import { Task, TaskStatistics, ValidationError } from "@/types";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const API = axios.create({ 
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://52.66.219.219/api",
   timeout: 90000, // 90 seconds to handle backend cold starts (Render free tier)
 });
 
@@ -15,7 +15,7 @@ API.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 API.interceptors.response.use(
@@ -30,7 +30,7 @@ API.interceptors.response.use(
       }, 1500);
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 API.interceptors.response.use(
@@ -42,7 +42,7 @@ API.interceptors.response.use(
       return Promise.reject(validationError);
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const getTaskStatistics = (): Promise<TaskStatistics> =>

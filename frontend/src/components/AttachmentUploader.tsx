@@ -89,7 +89,7 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({
       });
 
       // Start upload
-      xhr.open('POST', `http://localhost:8080/api/tasks/${taskId}/attachments`);
+      xhr.open('POST', `https://doqueue.ddns.net/api/tasks/${taskId}/attachments`);
       
       // Add authorization header if available
       const token = localStorage.getItem('token');
@@ -191,7 +191,7 @@ const AttachmentUploader: React.FC<AttachmentUploaderProps> = ({
       });
 
       // Start bulk upload
-      xhr.open('POST', `http://localhost:8080/api/tasks/${taskId}/attachments/bulk`);
+      xhr.open('POST', `https://doqueue.ddns.net/api/tasks/${taskId}/attachments/bulk`);
       
       // Add authorization header if available
       const token = localStorage.getItem('token');

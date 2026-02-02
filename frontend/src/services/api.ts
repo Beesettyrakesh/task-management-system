@@ -3,7 +3,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: "https://doqueue.ddns.net/api",
   timeout: 90000,
 });
 

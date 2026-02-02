@@ -56,7 +56,14 @@ function Login() {
 
           {/* Login Form */}
           <div className="bg-white py-8 px-6 shadow-lg rounded-lg border border-gray-200">
-            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <form 
+              className="space-y-6" 
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit(onSubmit)(e);
+              }} 
+              noValidate
+            >
               {/* Error Message */}
               {loginError && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">

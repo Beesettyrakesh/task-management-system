@@ -70,7 +70,14 @@ const Signup: React.FC = () => {
 
           {/* Signup Form */}
           <div className="bg-white py-8 px-6 shadow-lg rounded-lg border border-gray-200">
-            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            <form
+              className="space-y-6"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit(onSubmit)(e);
+              }}
+              noValidate
+            >
               {/* Username Field */}
               <div>
                 <label

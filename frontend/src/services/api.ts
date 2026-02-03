@@ -22,12 +22,24 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      toast.error("Session expired. Please login again.");
-      localStorage.removeItem("token");
-      window.dispatchEvent(new CustomEvent("auth-logout"));
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 1500);
+      const errorMessage = error.response?.data?.message || "";
+      const isInvalidCredentials =
+        errorMessage.toLowerCase().includes("invalid") ||
+        errorMessage.toLowerCase().includes("incorrect");
+      if (!isInvalidCredentials) {
+        const currentPath = window.location.pathname;
+        const isAuthPage =
+          currentPath === "/login" || currentPath === "/signup";
+
+        if (!isAuthPage) {
+          toast.error("Session expired. Please login again.");
+          localStorage.removeItem("token");
+          window.dispatchEvent(new CustomEvent("auth-logout"));
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 1500);
+        }
+      }
     }
     return Promise.reject(error);
   },

@@ -42,6 +42,7 @@ public class Task {
     private TaskStatus status;
 
     @Enumerated(EnumType.ORDINAL)
+    @Column(name = "priority", columnDefinition = "SMALLINT")
     private Priority priority;
 
     private LocalDate dueDate;

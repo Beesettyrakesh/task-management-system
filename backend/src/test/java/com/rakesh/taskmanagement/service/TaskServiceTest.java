@@ -205,12 +205,12 @@ public class TaskServiceTest {
         List<Task> todoTasks = Arrays.asList(testTask);
 
         when(userService.getCurrentUser()).thenReturn(testUser);
-        when(taskRepository.findByUserIdAndPriority(testUser.getId(), Priority.HIGH))
+        when(taskRepository.findByUserIdAndPriority(testUser.getId(), Priority.MEDIUM))
                 .thenReturn(todoTasks);
 
         List<Task> result = taskService.getFilteredTasks(
                 null,
-                Priority.HIGH,
+                Priority.MEDIUM,
                 null,
                 null
         );

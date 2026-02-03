@@ -312,13 +312,18 @@ public class AttachmentService {
         Attachment attachment = attachmentRepository.findByIdAndUserId(attachmentId, currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Attachment not found"));
 
+        S3Client client = s3Client
+                .orElseThrow(() -> new IllegalStateException(
+                        "S3 is not configured. Set aws.s3.enabled=true or provide an S3Client bean."
+                ));
+
         try {
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                     .bucket(bucketname)
                     .key(attachment.getStoragePath())
                     .build();
 
-            s3Client.deleteObject(deleteObjectRequest);
+            client.deleteObject(deleteObjectRequest);
             attachmentRepository.delete(attachment);
         } catch (Exception e) {
             throw new RuntimeException("Failed to delete file:" + e.getMessage());

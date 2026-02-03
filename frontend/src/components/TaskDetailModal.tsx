@@ -1,9 +1,5 @@
 import React, { useState } from "react";
 import { Task } from "../types";
-import Modal from "./Modal";
-import AttachmentList from "./AttachmentList";
-import AttachmentUploader from "./AttachmentUploader";
-import TagBadge from "./TagBadge";
 import {
   formatDueDate,
   formatStatusText,
@@ -11,6 +7,10 @@ import {
   getPriorityTextColor,
   getStatusBadgeColor,
 } from "../utils/taskUtils";
+import AttachmentList from "./AttachmentList";
+import AttachmentUploader from "./AttachmentUploader";
+import Modal from "./Modal";
+import TagBadge from "./TagBadge";
 
 interface TaskDetailModalProps {
   isOpen: boolean;
@@ -26,16 +26,17 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   onTaskUpdate,
 }) => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [activeTab, setActiveTab] = useState<'details' | 'attachments'>('details');
+  const [activeTab, setActiveTab] = useState<"details" | "attachments">(
+    "details",
+  );
 
   const handleUploadComplete = () => {
-    // Refresh attachment list
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
     onTaskUpdate?.();
   };
 
   const handleAttachmentDeleted = () => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
     onTaskUpdate?.();
   };
 
@@ -68,7 +69,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 >
                   {formatStatusText(task.status)}
                 </span>
-                <span className={`text-sm font-medium ${getPriorityTextColor(task.priority)}`}>
+                <span
+                  className={`text-sm font-medium ${getPriorityTextColor(task.priority)}`}
+                >
                   {task.priority} Priority
                 </span>
                 {task.dueDate && (
@@ -100,24 +103,26 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
           <div className="flex space-x-6">
             <button
-              onClick={() => setActiveTab('details')}
+              onClick={() => setActiveTab("details")}
               className={`
                 py-2 px-1 border-b-2 font-medium text-sm transition-colors
-                ${activeTab === 'details'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ${
+                  activeTab === "details"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }
               `}
             >
               Task Details
             </button>
             <button
-              onClick={() => setActiveTab('attachments')}
+              onClick={() => setActiveTab("attachments")}
               className={`
                 py-2 px-1 border-b-2 font-medium text-sm transition-colors
-                ${activeTab === 'attachments'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ${
+                  activeTab === "attachments"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }
               `}
             >
@@ -127,7 +132,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {activeTab === 'details' && (
+          {activeTab === "details" && (
             <div className="p-6 space-y-6">
               {task.description && (
                 <div>
@@ -151,7 +156,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-sm">No tags assigned to this task.</p>
+                  <p className="text-gray-500 text-sm">
+                    No tags assigned to this task.
+                  </p>
                 )}
               </div>
 
@@ -162,23 +169,33 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Status</span>
+                      <span className="text-sm font-medium text-gray-500">
+                        Status
+                      </span>
                       <p className="text-sm text-gray-900 mt-1">
                         {formatStatusText(task.status)}
                       </p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Priority</span>
-                      <p className={`text-sm mt-1 font-medium ${getPriorityTextColor(task.priority)}`}>
+                      <span className="text-sm font-medium text-gray-500">
+                        Priority
+                      </span>
+                      <p
+                        className={`text-sm mt-1 font-medium ${getPriorityTextColor(task.priority)}`}
+                      >
                         {task.priority}
                       </p>
                     </div>
                   </div>
-                  
+
                   {task.dueDate && (
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Due Date</span>
-                      <p className={`text-sm mt-1 ${getDueDateStyle(task.dueDate)}`}>
+                      <span className="text-sm font-medium text-gray-500">
+                        Due Date
+                      </span>
+                      <p
+                        className={`text-sm mt-1 ${getDueDateStyle(task.dueDate)}`}
+                      >
                         {formatDate(task.dueDate)}
                       </p>
                     </div>
@@ -186,7 +203,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
                   <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200">
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Created</span>
+                      <span className="text-sm font-medium text-gray-500">
+                        Created
+                      </span>
                       <p className="text-sm text-gray-700 mt-1">
                         {formatDate(task.createdAt)}
                       </p>
@@ -198,7 +217,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     </div>
                     {task.updatedAt && (
                       <div>
-                        <span className="text-sm font-medium text-gray-500">Last Updated</span>
+                        <span className="text-sm font-medium text-gray-500">
+                          Last Updated
+                        </span>
                         <p className="text-sm text-gray-700 mt-1">
                           {formatDate(task.updatedAt)}
                         </p>
@@ -215,7 +236,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
             </div>
           )}
 
-          {activeTab === 'attachments' && (
+          {activeTab === "attachments" && (
             <div className="p-6 space-y-6">
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-3">

@@ -30,7 +30,6 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   }
 };
 
-// Full page loading spinner
 export const LoadingPage: React.FC<{ text?: string }> = ({
   text = "Loading...",
 }) => {
@@ -44,7 +43,6 @@ export const LoadingPage: React.FC<{ text?: string }> = ({
   );
 };
 
-// Button loading spinner (inline with text)
 export const ButtonSpinner: React.FC = () => {
   return <Loader2 className="animate-spin w-4 h-4" />;
 };

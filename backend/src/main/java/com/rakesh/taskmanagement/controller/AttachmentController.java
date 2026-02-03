@@ -77,15 +77,11 @@ public class AttachmentController {
     ) {
         BulkUploadResponseDto response = attachmentService.uploadFiles(taskId, files);
         
-        // Return appropriate HTTP status based on results
         if (response.getFailureCount() == 0) {
-            // All files uploaded successfully
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } else if (response.getSuccessCount() > 0) {
-            // Partial success (some files uploaded, some failed)
             return ResponseEntity.status(HttpStatus.MULTI_STATUS).body(response);
         } else {
-            // All files failed
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }

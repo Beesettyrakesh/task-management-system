@@ -62,9 +62,6 @@ public class Task {
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Attachment> attachments = new HashSet<>();
 
-
-    // ===== AUDIT FIELDS (Automatically managed by Spring) =====
-
     @CreatedDate
     @Column(name = "created_at", nullable = false,  updatable = false)
     private LocalDateTime createdAt;

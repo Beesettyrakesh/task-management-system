@@ -20,7 +20,6 @@ public class ScheduledTaskService {
     private final TaskRepository taskRepository;
     private final EmailService emailService;
 
-//    @Scheduled(fixedRate = 60000)
     @Transactional
     @Scheduled(cron = "0 0 9 * * ?")
     public void sendTaskReminders() {

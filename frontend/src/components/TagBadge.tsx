@@ -17,9 +17,9 @@ const TagBadge: React.FC<TagBadgeProps> = ({
   size,
 }) => {
   const sizeClasses = {
-    sm: "px-2 py-1 text-xs", // Small: 8px padding, 12px text
-    md: "px-3 py-1 text-sm", // Medium: 12px padding, 14px text
-    lg: "px-4 py-2 text-base", // Large: 16px padding, 16px text
+    sm: "px-2 py-1 text-xs",
+    md: "px-3 py-1 text-sm",
+    lg: "px-4 py-2 text-base",
   };
 
   const textColor = isLightColor(tag.color) ? "text-black" : "text-white";

@@ -6,8 +6,8 @@ import AttachmentCard from "./AttachmentCard";
 
 interface AttachmentListProps {
   taskId: number;
-  refreshTrigger?: number; // Optional prop to trigger refresh from parent
-  onAttachmentDeleted?: () => void; // Callback to notify parent of deletion
+  refreshTrigger?: number;
+  onAttachmentDeleted?: () => void;
 }
 
 const AttachmentList: React.FC<AttachmentListProps> = ({ 
@@ -36,7 +36,6 @@ const AttachmentList: React.FC<AttachmentListProps> = ({
 
   const handleAttachmentDelete = (deletedFileId: number) => {
     setAttachments(prev => prev.filter(attachment => attachment.id !== deletedFileId));
-    // Notify parent component that an attachment was deleted
     onAttachmentDeleted?.();
   };
 
@@ -54,7 +53,6 @@ const AttachmentList: React.FC<AttachmentListProps> = ({
           </div>
         </div>
         
-        {/* Loading Skeleton */}
         {[1, 2, 3].map((index) => (
           <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="animate-pulse">
@@ -146,7 +144,6 @@ const AttachmentList: React.FC<AttachmentListProps> = ({
         </span>
       </div>
 
-      {/* Grid layout for attachments */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         {attachments.map((attachment) => (
           <div key={attachment.id} className="min-w-0 w-full">

@@ -44,7 +44,6 @@ function Login() {
     <Layout>
       <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
-          {/* Header */}
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               Welcome back
@@ -52,7 +51,6 @@ function Login() {
             <p className="text-gray-600">Please sign in to your account</p>
           </div>
 
-          {/* Login Form */}
           <div className="bg-white py-8 px-6 shadow-lg rounded-lg border border-gray-200">
             <form
               className="space-y-6"
@@ -62,7 +60,6 @@ function Login() {
               }}
               noValidate
             >
-              {/* Error Message */}
               {loginError && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
                   <div className="flex items-center">
@@ -84,7 +81,6 @@ function Login() {
                 </div>
               )}
 
-              {/* Username Field */}
               <div>
                 <label
                   htmlFor="username"
@@ -123,7 +119,6 @@ function Login() {
                 )}
               </div>
 
-              {/* Password Field */}
               <div>
                 <label
                   htmlFor="password"
@@ -162,7 +157,6 @@ function Login() {
                 )}
               </div>
 
-              {/* Submit Button */}
               <div>
                 <button
                   type="submit"
@@ -200,7 +194,6 @@ function Login() {
               </div>
             </form>
 
-            {/* Sign up link */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{" "}

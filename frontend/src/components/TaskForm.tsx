@@ -64,7 +64,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
     setValue,
     watch,
   } = useForm<TaskFormData>({
-    mode: 'onChange',
+    mode: "onChange",
     defaultValues: formDefaultValues,
   });
 
@@ -72,11 +72,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
     (priority) => ({
       value: priority,
       label: priority.charAt(0) + priority.slice(1).toLowerCase(),
-    })
+    }),
   );
 
   const taskStatusOptions: SelectOption<TaskStatus>[] = Object.values(
-    TaskStatus
+    TaskStatus,
   ).map((status) => ({
     value: status,
     label: status
@@ -104,11 +104,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
     } catch (error: any) {
       console.error(
         `Error ${isEditMode ? "updating" : "creating"} task:`,
-        error
+        error,
       );
       toast.error(
         error.response?.data?.message ||
-          `Failed to ${isEditMode ? "update" : "create"} task`
+          `Failed to ${isEditMode ? "update" : "create"} task`,
       );
     }
   };
@@ -136,7 +136,10 @@ const TaskForm: React.FC<TaskFormProps> = ({
                 value: 3,
                 message: "Title must be at least 3 characters",
               },
-              maxLength: { value: 100, message: 'Title cannot exceed 100 characters' }
+              maxLength: {
+                value: 100,
+                message: "Title cannot exceed 100 characters",
+              },
             })}
             className={`appearance-none relative block w-full px-3 py-3 border ${
               errors.title ? "border-red-300" : "border-gray-300"

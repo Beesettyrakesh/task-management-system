@@ -66,7 +66,6 @@ const AttachmentCard: React.FC<AttachmentCardProps> = ({ file, onDelete }) => {
   return (
     <>
       <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200 p-4 w-full max-w-full">
-        {/* File Header */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-3 flex-1 min-w-0">
             <div className="flex-shrink-0">
@@ -93,7 +92,6 @@ const AttachmentCard: React.FC<AttachmentCardProps> = ({ file, onDelete }) => {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex space-x-2 mt-3 pt-3 border-t border-gray-100">
           <button
             onClick={handleDownload}

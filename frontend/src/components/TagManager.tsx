@@ -10,14 +10,14 @@ interface TagManagerProps {
 
 const TagManager: React.FC<TagManagerProps> = ({ onTagsChange }) => {
   const COLOR_OPTIONS = [
-    "#EF4444", // red-500
-    "#F97316", // orange-500
-    "#EAB308", // yellow-500
-    "#22C55E", // green-500
-    "#3B82F6", // blue-500
-    "#8B5CF6", // violet-500
-    "#EC4899", // pink-500
-    "#6B7280", // gray-500
+    "#EF4444",
+    "#F97316",
+    "#EAB308",
+    "#22C55E",
+    "#3B82F6",
+    "#8B5CF6",
+    "#EC4899",
+    "#6B7280",
   ];
 
   const [tags, setTags] = useState<Tag[]>([]);
@@ -174,8 +174,8 @@ const TagManager: React.FC<TagManagerProps> = ({ onTagsChange }) => {
               {isLoading
                 ? "Saving..."
                 : editingTag
-                ? "Update Tag"
-                : "Create Tag"}
+                  ? "Update Tag"
+                  : "Create Tag"}
             </button>
             <button
               onClick={cancelForm}

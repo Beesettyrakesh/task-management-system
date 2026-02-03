@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +26,7 @@ import com.rakesh.taskmanagement.repository.TaskRepository;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
@@ -89,7 +89,6 @@ public class TaskService {
         User currentUser = userService.getCurrentUser();
         log.debug("Fetching all tasks for user: {}", currentUser.getUsername());
         
-        // ⚡ OPTIMIZATION: Using JOIN FETCH to prevent N+1 problems
         List<Task> tasks = taskRepository.findByUserIdOptimized(currentUser.getId());
 
         log.info("Found {} tasks for user: {}", tasks.size(), currentUser.getUsername());
@@ -177,7 +176,6 @@ public class TaskService {
         }
     }
 
-    // filtering services
     public List<Task> getTasksByStatus(TaskStatus status) {
         User currentUser = userService.getCurrentUser();
         return taskRepository.findByUserIdAndStatus(currentUser.getId(), status);
@@ -214,7 +212,6 @@ public class TaskService {
         User currentUser = userService.getCurrentUser();
         log.info("Filtering tasks by tag: '{}' for user: {}", tagName, currentUser.getUsername());
         
-        // Two-step approach: First get task IDs matching the tag, then fetch full tasks with all tags
         List<Long> taskIds = taskRepository.findTaskIdsByUserIdAndTagName(currentUser.getId(), tagName);
         
         if (taskIds.isEmpty()) {
@@ -363,23 +360,19 @@ public class TaskService {
         User currentUser = userService.getCurrentUser();
         Long userId = currentUser.getId();
 
-        // ⚡ OPTIMIZATION: Use optimized count queries (safer approach)
         Long totalTasks = taskRepository.countByUserId(userId);
         Long completedTasks = taskRepository.countByUserIdAndStatus(userId, TaskStatus.DONE);
         Long inProgressTasks = taskRepository.countByUserIdAndStatus(userId, TaskStatus.IN_PROGRESS);
         Long todoTasks = taskRepository.countByUserIdAndStatus(userId, TaskStatus.TODO);
         Long overdueTasks = taskRepository.countByUserIdAndDueDateBeforeAndStatusNot(userId, LocalDate.now(), TaskStatus.DONE);
 
-        // ⚡ OPTIMIZATION: Single query for priority statistics  
         List<Object[]> priorityResults = taskRepository.getPriorityStatistics(userId);
         Map<Priority, Long> priorityStats = new EnumMap<>(Priority.class);
         
-        // Initialize all priorities with 0
         for(Priority priority: Priority.values()) {
             priorityStats.put(priority, 0L);
         }
         
-        // Fill in actual counts from query results  
         for(Object[] result : priorityResults) {
             Priority priority = (Priority) result[0];
             Long count = ((Number) result[1]).longValue();
@@ -391,7 +384,6 @@ public class TaskService {
 
     public List<Task> getRecentTasks() {
         User currentUser = userService.getCurrentUser();
-        // ⚡ OPTIMIZATION: Using optimized query with JOIN FETCH for tags
         return taskRepository.findTop5ByUserIdWithTagsOrderByCreatedAtDesc(currentUser.getId());
     }
 

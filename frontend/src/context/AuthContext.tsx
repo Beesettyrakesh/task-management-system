@@ -6,7 +6,7 @@ import {
   User,
 } from "@/types";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 import API from "../services/api";
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -62,8 +62,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
     };
 
-    window.addEventListener('auth-logout', handleInterceptorLogout);
-    return () => window.removeEventListener('auth-logout', handleInterceptorLogout);
+    window.addEventListener("auth-logout", handleInterceptorLogout);
+    return () =>
+      window.removeEventListener("auth-logout", handleInterceptorLogout);
   }, []);
 
   const signup = async (userData: SignupData): Promise<AuthResult> => {
@@ -146,7 +147,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const username = user?.username;
     setToken("");
     setUser(null);
-    toast.success(`Goodbye${username ? `, ${username}` : ''}! You've been logged out.`);
+    toast.success(
+      `Goodbye${username ? `, ${username}` : ""}! You've been logged out.`,
+    );
   };
 
   const value = {

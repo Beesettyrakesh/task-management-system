@@ -165,35 +165,6 @@ public class TaskController {
         });
 
         return ResponseEntity.ok(responsePage);
-//        log.info("GET /api/tasks - Retrieve tasks with filters: status='{}', priority='{}', sortBy='{}', sortDirection='{}', tagName='{}'",
-//                 status, priority, sortBy, sortDirection, tagName);
-//
-//        List<Task> tasks;
-//
-//        // Priority: Tag filtering takes precedence if provided
-//        if (tagName != null && !tagName.trim().isEmpty()) {
-//            tasks = taskService.getTasksByTagName(tagName.trim());
-//            log.debug("GET /api/tasks - Filtered by tag '{}', found {} tasks", tagName, tasks.size());
-//        } else if(status != null || priority != null || sortBy != null || sortDirection != null) {
-//            try {
-//                TaskStatus taskStatus = status != null ? TaskStatus.valueOf(status.toUpperCase()) : null;
-//                Priority taskPriority = priority != null ? Priority.valueOf(priority.toUpperCase()) : null;
-//                tasks = taskService.getFilteredTasks(taskStatus, taskPriority, sortBy, sortDirection);
-//                log.debug("GET /api/tasks - Applied filters, found {} filtered tasks", tasks.size());
-//            } catch (IllegalArgumentException e) {
-//                log.warn("GET /api/tasks - Invalid filter parameters: {} - Response: 400 Bad Request", e.getMessage());
-//                throw new IllegalArgumentException("Invalid status or priority value: " + e.getMessage());
-//            }
-//        } else {
-//            tasks = taskService.getAllTasks();
-//        }
-//
-//        List<TaskResponseDto> responseDtos = tasks.stream()
-//            .map(TaskResponseDto::from)
-//            .collect(Collectors.toList());
-//
-//        log.info("GET /api/tasks - Retrieved {} tasks successfully - Response: 200 OK", responseDtos.size());
-//        return ResponseEntity.ok(responseDtos);
     }
 
     @Operation(

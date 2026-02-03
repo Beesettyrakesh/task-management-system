@@ -1,7 +1,7 @@
-import { customSelectStyles } from "../utils/selectStyles";
 import React from "react";
 import Select from "react-select";
 import { Priority, TaskStatus } from "../types";
+import { customSelectStyles } from "../utils/selectStyles";
 
 export interface TaskFilters {
   status?: TaskStatus | null;
@@ -125,8 +125,8 @@ const FilterControls: React.FC<FilterControlProps> = ({
               !filters.sortBy
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                 : filters.sortDirection === "desc"
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
             }`}
           >
             {filters.sortDirection === "desc" ? "↓ DESC" : "↑ ASC"}
@@ -160,7 +160,10 @@ const FilterControls: React.FC<FilterControlProps> = ({
           )}
           {filters.tagName && (
             <span className="inline-flex items-center mr-2">
-              Tag: <span className="ml-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-medium">{filters.tagName}</span>
+              Tag:{" "}
+              <span className="ml-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-medium">
+                {filters.tagName}
+              </span>
             </span>
           )}
         </div>

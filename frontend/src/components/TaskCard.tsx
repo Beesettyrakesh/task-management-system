@@ -1,23 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import Select from "react-select";
+import { showErrorToast, showSuccessToast } from "../config/toastConfig";
 import API from "../services/api";
 import { SelectOption, Task, TaskFormData, TaskStatus } from "../types";
 import { customSelectStyles } from "../utils/selectStyles";
-import { showSuccessToast, showErrorToast } from "../config/toastConfig";
-import { ConfirmationModal } from "./ConfirmationModal";
 import {
   formatDueDate,
-  formatStatusText,
   getDueDateStyle,
   getPriorityBorderColor,
-  getPriorityTextColor,
   getStatusBadgeColor,
 } from "../utils/taskUtils";
+import { ConfirmationModal } from "./ConfirmationModal";
 import Modal from "./Modal";
-import TagBadge from "./TagBadge";
-import TaskForm from "./TaskForm";
 import TaskDetailModal from "./TaskDetailModal";
+import TaskForm from "./TaskForm";
 
 interface TaskCardProps {
   task: Task;
@@ -52,7 +49,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   const taskStatusOptions: SelectOption<TaskStatus>[] = Object.values(
-    TaskStatus
+    TaskStatus,
   ).map((status) => ({
     value: status,
     label: status
@@ -116,14 +113,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
   }, [isStatusDropdownOpen]);
 
   const onsubmit: SubmitHandler<{ status: SelectOption<TaskStatus> }> = async (
-    data
+    data,
   ) => {
     if (!data.status?.value) return;
 
     setIsUpdating(true);
-    
+
     const previousStatus = localTask.status;
-    setLocalTask(prev => ({ ...prev, status: data.status.value }));
+    setLocalTask((prev) => ({ ...prev, status: data.status.value }));
 
     try {
       const updatedTask = {
@@ -139,13 +136,12 @@ const TaskCard: React.FC<TaskCardProps> = ({
       setIsStatusDropdownOpen(false);
       showSuccessToast("Task status updated successfully!");
     } catch (error: any) {
-      setLocalTask(prev => ({ ...prev, status: previousStatus }));
+      setLocalTask((prev) => ({ ...prev, status: previousStatus }));
       showErrorToast("Failed to update task status");
     } finally {
       setIsUpdating(false);
     }
   };
-
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -188,7 +184,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              <span className={getDueDateStyle(localTask.dueDate, localTask.status)}>
+              <span
+                className={getDueDateStyle(localTask.dueDate, localTask.status)}
+              >
                 {formatDueDate(localTask.dueDate)}
               </span>
             </div>
@@ -203,14 +201,24 @@ const TaskCard: React.FC<TaskCardProps> = ({
           >
             View
           </button>
-          
+
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
             title="Edit task"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
             </svg>
           </button>
 
@@ -219,8 +227,18 @@ const TaskCard: React.FC<TaskCardProps> = ({
             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
             title="Delete task"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
             </svg>
           </button>
 
@@ -239,35 +257,51 @@ const TaskCard: React.FC<TaskCardProps> = ({
                     ...customSelectStyles,
                     control: (provided, state) => ({
                       ...provided,
-                      minHeight: '32px',
-                      height: '32px',
-                      minWidth: '100px',
-                      fontSize: '12px',
-                      backgroundColor: getStatusBadgeColor(localTask.status).includes('bg-green') ? '#dcfce7' :
-                                     getStatusBadgeColor(localTask.status).includes('bg-yellow') ? '#fef3c7' : '#dbeafe',
-                      border: 'none',
-                      borderRadius: '9999px',
-                      boxShadow: state.isFocused ? '0 0 0 2px rgba(59, 130, 246, 0.5)' : 'none',
+                      minHeight: "32px",
+                      height: "32px",
+                      minWidth: "100px",
+                      fontSize: "12px",
+                      backgroundColor: getStatusBadgeColor(
+                        localTask.status,
+                      ).includes("bg-green")
+                        ? "#dcfce7"
+                        : getStatusBadgeColor(localTask.status).includes(
+                              "bg-yellow",
+                            )
+                          ? "#fef3c7"
+                          : "#dbeafe",
+                      border: "none",
+                      borderRadius: "9999px",
+                      boxShadow: state.isFocused
+                        ? "0 0 0 2px rgba(59, 130, 246, 0.5)"
+                        : "none",
                     }),
                     valueContainer: (provided) => ({
                       ...provided,
-                      height: '32px',
-                      padding: '0 8px',
+                      height: "32px",
+                      padding: "0 8px",
                     }),
                     input: (provided) => ({
                       ...provided,
-                      margin: '0px',
+                      margin: "0px",
                     }),
                     indicatorsContainer: (provided) => ({
                       ...provided,
-                      height: '32px',
+                      height: "32px",
                     }),
                     singleValue: (provided) => ({
                       ...provided,
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      color: getStatusBadgeColor(localTask.status).includes('bg-green') ? '#166534' :
-                             getStatusBadgeColor(localTask.status).includes('bg-yellow') ? '#92400e' : '#1e40af',
+                      fontSize: "12px",
+                      fontWeight: "500",
+                      color: getStatusBadgeColor(localTask.status).includes(
+                        "bg-green",
+                      )
+                        ? "#166534"
+                        : getStatusBadgeColor(localTask.status).includes(
+                              "bg-yellow",
+                            )
+                          ? "#92400e"
+                          : "#1e40af",
                     }),
                   }}
                   isDisabled={isUpdating}

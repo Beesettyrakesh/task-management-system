@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Tag } from "../types";
+import React, { useEffect, useState } from "react";
+import { showErrorToast, showSuccessToast } from "../config/toastConfig";
 import API from "../services/api";
-import { showSuccessToast, showErrorToast } from "../config/toastConfig";
+import { Tag } from "../types";
 import { ConfirmationModal } from "./ConfirmationModal";
 
 interface TagOverviewProps {
@@ -10,7 +10,11 @@ interface TagOverviewProps {
   activeTag?: string | null;
 }
 
-const TagOverview: React.FC<TagOverviewProps> = ({ onTagsChange, onTagClick, activeTag }) => {
+const TagOverview: React.FC<TagOverviewProps> = ({
+  onTagsChange,
+  onTagClick,
+  activeTag,
+}) => {
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAllModal, setShowAllModal] = useState(false);
@@ -22,10 +26,12 @@ const TagOverview: React.FC<TagOverviewProps> = ({ onTagsChange, onTagClick, act
   const fetchTags = async () => {
     try {
       const response = await API.get("/tags");
-      // Sort by usage/creation and take first 8 tags
-      const sortedTags = response.data.sort((a: Tag, b: Tag) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ).slice(0, 8);
+      const sortedTags = response.data
+        .sort(
+          (a: Tag, b: Tag) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+        .slice(0, 8);
       setTags(sortedTags);
     } catch (error) {
       console.error("Failed to fetch tags:", error);
@@ -51,11 +57,14 @@ const TagOverview: React.FC<TagOverviewProps> = ({ onTagsChange, onTagClick, act
             View All
           </button>
         </div>
-        
+
         {loading ? (
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-6 bg-gray-200 rounded animate-pulse"></div>
+              <div
+                key={i}
+                className="h-6 bg-gray-200 rounded animate-pulse"
+              ></div>
             ))}
           </div>
         ) : tags.length > 0 ? (
@@ -65,15 +74,25 @@ const TagOverview: React.FC<TagOverviewProps> = ({ onTagsChange, onTagClick, act
                 key={tag.id}
                 onClick={() => onTagClick?.(tag.name)}
                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white transition-all hover:scale-105 hover:shadow-md ${
-                  activeTag === tag.name ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+                  activeTag === tag.name
+                    ? "ring-2 ring-offset-2 ring-blue-500"
+                    : ""
                 }`}
                 style={{ backgroundColor: tag.color }}
                 title={`Filter by ${tag.name}`}
               >
                 {tag.name}
                 {activeTag === tag.name && (
-                  <svg className="ml-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <svg
+                    className="ml-1 w-3 h-3"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 )}
               </button>
@@ -87,9 +106,8 @@ const TagOverview: React.FC<TagOverviewProps> = ({ onTagsChange, onTagClick, act
         )}
       </div>
 
-      {/* Tag Management Modal */}
       {showAllModal && (
-        <TagManagementModal 
+        <TagManagementModal
           isOpen={showAllModal}
           onClose={() => setShowAllModal(false)}
           onTagsChange={handleTagsChange}
@@ -99,7 +117,6 @@ const TagOverview: React.FC<TagOverviewProps> = ({ onTagsChange, onTagClick, act
   );
 };
 
-// Simple Tag Management Modal Component
 interface TagManagementModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -116,7 +133,10 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState("#3B82F6");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; tag: Tag | null }>({
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    tag: Tag | null;
+  }>({
     isOpen: false,
     tag: null,
   });
@@ -131,7 +151,9 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
   const fetchTags = async () => {
     try {
       const response = await API.get("/tags");
-      setTags(response.data.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name)));
+      setTags(
+        response.data.sort((a: Tag, b: Tag) => a.name.localeCompare(b.name)),
+      );
     } catch (error) {
       showErrorToast("Failed to fetch tags");
     } finally {
@@ -149,7 +171,7 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
         name: newTagName.trim(),
         color: newTagColor,
       });
-      
+
       setNewTagName("");
       setNewTagColor("#3B82F6");
       fetchTags();
@@ -190,8 +212,18 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -200,7 +232,10 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-center justify-between p-3 border rounded-lg animate-pulse">
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-3 border rounded-lg animate-pulse"
+                >
                   <div className="flex items-center space-x-3">
                     <div className="w-4 h-4 bg-gray-200 rounded-full"></div>
                     <div className="h-4 bg-gray-200 rounded w-24"></div>
@@ -212,13 +247,18 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
           ) : (
             <div className="space-y-3">
               {tags.map((tag) => (
-                <div key={tag.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div
+                  key={tag.id}
+                  className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                >
                   <div className="flex items-center space-x-3">
                     <div
                       className="w-4 h-4 rounded-full"
                       style={{ backgroundColor: tag.color }}
                     ></div>
-                    <span className="font-medium text-gray-900">{tag.name}</span>
+                    <span className="font-medium text-gray-900">
+                      {tag.name}
+                    </span>
                   </div>
                   <button
                     onClick={() => setDeleteConfirmation({ isOpen: true, tag })}
@@ -228,7 +268,7 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
                   </button>
                 </div>
               ))}
-              
+
               {tags.length === 0 && (
                 <div className="text-center text-gray-500 py-8">
                   <div className="text-4xl mb-2">🏷️</div>
@@ -239,7 +279,6 @@ const TagManagementModal: React.FC<TagManagementModalProps> = ({
           )}
         </div>
 
-        {/* Create New Tag Form */}
         <div className="border-t border-gray-200 p-6">
           <form onSubmit={handleCreateTag} className="space-y-4">
             <div className="flex space-x-3">

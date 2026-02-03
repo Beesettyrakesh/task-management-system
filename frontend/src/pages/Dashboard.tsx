@@ -1,12 +1,14 @@
+import { getRecentTasks, getTaskStatistics } from "@/services/api";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import FilterControls, { TaskFilters } from "../components/FilterControls";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
+import PriorityChart from "../components/PriorityChart";
+import StatisticsOverview from "../components/StatisticsOverview";
+import TagOverview from "../components/TagOverview";
 import TaskForm from "../components/TaskForm";
 import TaskList from "../components/TaskList";
-import StatisticsOverview from "../components/StatisticsOverview";
-import PriorityChart from "../components/PriorityChart";
-import TagOverview from "../components/TagOverview";
 import { useAuth } from "../hooks/useAuth";
 import {
   Priority,
@@ -15,8 +17,6 @@ import {
   TaskStatistics,
   TaskStatus,
 } from "../types";
-import { getRecentTasks, getTaskStatistics } from "@/services/api";
-import toast from "react-hot-toast";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -79,7 +79,7 @@ const Dashboard: React.FC = () => {
 
   const handleRefresh = async () => {
     setRefreshTrigger((prev) => prev + 1);
-    
+
     try {
       const [statsData, recentData] = await Promise.all([
         getTaskStatistics(),
@@ -87,9 +87,9 @@ const Dashboard: React.FC = () => {
       ]);
       setStatistics(statsData);
       setRecentTasks(recentData);
-      console.log('✅ Dashboard data refreshed successfully');
+      console.log("✅ Dashboard data refreshed successfully");
     } catch (error) {
-      console.error('❌ Failed to refresh dashboard data:', error);
+      console.error("❌ Failed to refresh dashboard data:", error);
     }
   };
 
@@ -134,8 +134,18 @@ const Dashboard: React.FC = () => {
                   onClick={handleCreateTask}
                   className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center space-x-1 transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                   <span>Create Task</span>
                 </button>
@@ -157,7 +167,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            <TagOverview 
+            <TagOverview
               onTagsChange={handleRefresh}
               onTagClick={handleTagClick}
               activeTag={filters.tagName || null}

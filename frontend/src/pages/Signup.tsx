@@ -60,7 +60,6 @@ const Signup: React.FC = () => {
     <Layout>
       <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
-          {/* Header */}
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               Create your account
@@ -68,7 +67,6 @@ const Signup: React.FC = () => {
             <p className="text-gray-600">Get started with TaskManager today</p>
           </div>
 
-          {/* Signup Form */}
           <div className="bg-white py-8 px-6 shadow-lg rounded-lg border border-gray-200">
             <form
               className="space-y-6"
@@ -78,7 +76,6 @@ const Signup: React.FC = () => {
               }}
               noValidate
             >
-              {/* Username Field */}
               <div>
                 <label
                   htmlFor="username"
@@ -121,7 +118,6 @@ const Signup: React.FC = () => {
                 )}
               </div>
 
-              {/* Email Field */}
               <div>
                 <label
                   htmlFor="email"
@@ -164,7 +160,6 @@ const Signup: React.FC = () => {
                 )}
               </div>
 
-              {/* Password Field */}
               <div>
                 <label
                   htmlFor="password"
@@ -207,7 +202,6 @@ const Signup: React.FC = () => {
                 )}
               </div>
 
-              {/* Submit Button */}
               <div>
                 <button
                   type="submit"
@@ -245,7 +239,6 @@ const Signup: React.FC = () => {
               </div>
             </form>
 
-            {/* Sign in link */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}

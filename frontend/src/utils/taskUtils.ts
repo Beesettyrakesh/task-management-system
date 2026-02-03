@@ -88,13 +88,15 @@ export const formatTaskForApi = (data: TaskFormData) => {
     dueDate: data.dueDate ? data.dueDate.toISOString().split("T")[0] : null,
     priority: data.priority?.value,
     status: data.status?.value,
-    tagIds: data.tags?.map(tag => tag.id) || [],
+    tagIds: data.tags?.map((tag) => tag.id) || [],
   };
 };
 
 export const formatDueDate = formatDate;
-export const getDueDateStyle = (dateString: string, status?: TaskStatus): string => {
-  // If task is completed, grey out the date
+export const getDueDateStyle = (
+  dateString: string,
+  status?: TaskStatus,
+): string => {
   if (status === TaskStatus.DONE) {
     return "text-gray-500";
   }

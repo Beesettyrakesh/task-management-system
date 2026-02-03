@@ -1,26 +1,26 @@
+import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth"
-import { ReactNode } from "react"
+import { useAuth } from "../hooks/useAuth";
 
 interface ProtectedRouteProps {
-    children: ReactNode
+  children: ReactNode;
 }
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-    const {isAuthenticated, loading} = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-    if(loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="text-xl">Loading...</div>
-            </div>
-        );
-    }
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
 
-    if(!isAuthenticated) {
-        return <Navigate to="/login" replace />;
-    }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-    return <>{children}</>;
-}
+  return <>{children}</>;
+};
 
 export default ProtectedRoute;

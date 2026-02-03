@@ -9,7 +9,7 @@ export interface FileWithValidation extends File {
 interface FileDropzoneProps {
   onFilesSelected: (files: FileWithValidation[]) => void;
   disabled?: boolean;
-  maxFileSize?: number; // in bytes
+  maxFileSize?: number;
   acceptedFileTypes?: string[];
   maxFiles?: number;
   className?: string;
@@ -18,20 +18,28 @@ interface FileDropzoneProps {
 const FileDropzone: React.FC<FileDropzoneProps> = ({
   onFilesSelected,
   disabled = false,
-  maxFileSize = 10 * 1024 * 1024, // 10MB default
+  maxFileSize = 10 * 1024 * 1024,
   acceptedFileTypes = [
-    // Documents
-    '.pdf', '.doc', '.docx', '.txt', '.rtf',
-    // Images
-    '.jpg', '.jpeg', '.png', '.gif', '.webp',
-    // Spreadsheets
-    '.xls', '.xlsx', '.csv',
-    // Presentations
-    '.ppt', '.pptx',
-    // Archives
-    '.zip', '.rar', '.7z',
-    // Other
-    '.json', '.xml'
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".txt",
+    ".rtf",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".webp",
+    ".xls",
+    ".xlsx",
+    ".csv",
+    ".ppt",
+    ".pptx",
+    ".zip",
+    ".rar",
+    ".7z",
+    ".json",
+    ".xml",
   ],
   maxFiles = 5,
   className = "",
@@ -39,20 +47,25 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
   const [dragCount, setDragCount] = useState(0);
 
   const validateFile = (file: File): string | null => {
-    // Check file size
     if (file.size > maxFileSize) {
       const maxSizeMB = maxFileSize / (1024 * 1024);
       return `File size exceeds ${maxSizeMB}MB limit`;
     }
 
-    // Check file type
-    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+    const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
     if (!acceptedFileTypes.includes(fileExtension)) {
-      return `File type not supported. Allowed types: ${acceptedFileTypes.join(', ')}`;
+      return `File type not supported. Allowed types: ${acceptedFileTypes.join(", ")}`;
     }
 
-    // Check for dangerous file extensions
-    const dangerousExtensions = ['.exe', '.bat', '.cmd', '.scr', '.vbs', '.js', '.jar'];
+    const dangerousExtensions = [
+      ".exe",
+      ".bat",
+      ".cmd",
+      ".scr",
+      ".vbs",
+      ".js",
+      ".jar",
+    ];
     if (dangerousExtensions.includes(fileExtension)) {
       return `File type not allowed for security reasons`;
     }
@@ -60,82 +73,80 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
     return null;
   };
 
-  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any[]) => {
-    // Handle rejected files
-    rejectedFiles.forEach((rejection) => {
-      const errors = rejection.errors.map((e: any) => e.message).join(', ');
-      toast.error(`${rejection.file.name}: ${errors}`);
-    });
+  const onDrop = useCallback(
+    (acceptedFiles: File[], rejectedFiles: any[]) => {
+      rejectedFiles.forEach((rejection) => {
+        const errors = rejection.errors.map((e: any) => e.message).join(", ");
+        toast.error(`${rejection.file.name}: ${errors}`);
+      });
 
-    if (acceptedFiles.length === 0 && rejectedFiles.length > 0) {
-      return;
-    }
-
-    // Validate accepted files
-    const validatedFiles: FileWithValidation[] = acceptedFiles.map((file) => {
-      const validationError = validateFile(file);
-      const fileWithValidation = file as FileWithValidation;
-      
-      if (validationError) {
-        fileWithValidation.validationError = validationError;
-        toast.error(`${file.name}: ${validationError}`);
+      if (acceptedFiles.length === 0 && rejectedFiles.length > 0) {
+        return;
       }
-      
-      return fileWithValidation;
-    });
 
-    // Filter out files with validation errors
-    const validFiles = validatedFiles.filter(file => !file.validationError);
+      const validatedFiles: FileWithValidation[] = acceptedFiles.map((file) => {
+        const validationError = validateFile(file);
+        const fileWithValidation = file as FileWithValidation;
 
-    if (validFiles.length > 0) {
-      onFilesSelected(validFiles);
-      
-      // Show success message
-      toast.success(
-        `${validFiles.length} file${validFiles.length > 1 ? 's' : ''} ready to upload`
-      );
-    }
+        if (validationError) {
+          fileWithValidation.validationError = validationError;
+          toast.error(`${file.name}: ${validationError}`);
+        }
 
-    setDragCount(0);
-  }, [acceptedFileTypes, maxFileSize, onFilesSelected]);
+        return fileWithValidation;
+      });
 
-  const {
-    getRootProps,
-    getInputProps,
-    isDragActive,
-    isDragReject,
-  } = useDropzone({
-    onDrop,
-    disabled,
-    maxFiles,
-    maxSize: maxFileSize,
-    accept: {
-      // Convert our string array to the format react-dropzone expects
-      'application/pdf': ['.pdf'],
-      'application/msword': ['.doc'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-      'text/plain': ['.txt'],
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
-      'image/gif': ['.gif'],
-      'image/webp': ['.webp'],
-      'application/vnd.ms-excel': ['.xls'],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-      'text/csv': ['.csv'],
-      'application/vnd.ms-powerpoint': ['.ppt'],
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
-      'application/zip': ['.zip'],
-      'application/json': ['.json'],
-      'application/xml': ['.xml'],
+      const validFiles = validatedFiles.filter((file) => !file.validationError);
+
+      if (validFiles.length > 0) {
+        onFilesSelected(validFiles);
+
+        toast.success(
+          `${validFiles.length} file${validFiles.length > 1 ? "s" : ""} ready to upload`,
+        );
+      }
+
+      setDragCount(0);
     },
-    onDragEnter: () => setDragCount(prev => prev + 1),
-    onDragLeave: () => setDragCount(prev => prev - 1),
-  });
+    [acceptedFileTypes, maxFileSize, onFilesSelected],
+  );
+
+  const { getRootProps, getInputProps, isDragActive, isDragReject } =
+    useDropzone({
+      onDrop,
+      disabled,
+      maxFiles,
+      maxSize: maxFileSize,
+      accept: {
+        "application/pdf": [".pdf"],
+        "application/msword": [".doc"],
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+          [".docx"],
+        "text/plain": [".txt"],
+        "image/jpeg": [".jpg", ".jpeg"],
+        "image/png": [".png"],
+        "image/gif": [".gif"],
+        "image/webp": [".webp"],
+        "application/vnd.ms-excel": [".xls"],
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+          ".xlsx",
+        ],
+        "text/csv": [".csv"],
+        "application/vnd.ms-powerpoint": [".ppt"],
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+          [".pptx"],
+        "application/zip": [".zip"],
+        "application/json": [".json"],
+        "application/xml": [".xml"],
+      },
+      onDragEnter: () => setDragCount((prev) => prev + 1),
+      onDragLeave: () => setDragCount((prev) => prev - 1),
+    });
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) return "0 B";
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
   };
@@ -144,15 +155,15 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
     if (disabled) {
       return "border-gray-200 bg-gray-50 cursor-not-allowed";
     }
-    
+
     if (isDragReject) {
       return "border-red-300 bg-red-50 border-solid";
     }
-    
+
     if (isDragActive || dragCount > 0) {
       return "border-blue-400 bg-blue-50 border-solid scale-105";
     }
-    
+
     return "border-gray-300 bg-white hover:border-blue-400 hover:bg-blue-50";
   };
 
@@ -163,17 +174,16 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
         className={`
           relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 
           ${getDropzoneStyle()}
-          ${disabled ? '' : 'cursor-pointer'}
+          ${disabled ? "" : "cursor-pointer"}
         `}
       >
         <input {...getInputProps()} />
-        
+
         <div className="space-y-4">
-          {/* Upload Icon */}
           <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gray-100">
             {isDragActive ? (
               <svg
-                className={`h-6 w-6 ${isDragReject ? 'text-red-600' : 'text-blue-600'}`}
+                className={`h-6 w-6 ${isDragReject ? "text-red-600" : "text-blue-600"}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -187,7 +197,7 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
               </svg>
             ) : (
               <svg
-                className={`h-6 w-6 ${disabled ? 'text-gray-400' : 'text-gray-600'}`}
+                className={`h-6 w-6 ${disabled ? "text-gray-400" : "text-gray-600"}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -202,39 +212,45 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({
             )}
           </div>
 
-          {/* Upload Text */}
           <div>
             {isDragActive ? (
-              <p className={`text-sm font-medium ${isDragReject ? 'text-red-600' : 'text-blue-600'}`}>
-                {isDragReject ? 'Some files are not supported' : 'Drop files here...'}
+              <p
+                className={`text-sm font-medium ${isDragReject ? "text-red-600" : "text-blue-600"}`}
+              >
+                {isDragReject
+                  ? "Some files are not supported"
+                  : "Drop files here..."}
               </p>
             ) : (
               <>
-                <p className={`text-sm font-medium ${disabled ? 'text-gray-400' : 'text-gray-900'}`}>
-                  {disabled ? 'Upload disabled' : 'Drag & drop files here, or click to browse'}
+                <p
+                  className={`text-sm font-medium ${disabled ? "text-gray-400" : "text-gray-900"}`}
+                >
+                  {disabled
+                    ? "Upload disabled"
+                    : "Drag & drop files here, or click to browse"}
                 </p>
                 {!disabled && (
                   <p className="text-xs text-gray-500 mt-1">
-                    Maximum {maxFiles} files, up to {formatFileSize(maxFileSize)} each
+                    Maximum {maxFiles} files, up to{" "}
+                    {formatFileSize(maxFileSize)} each
                   </p>
                 )}
               </>
             )}
           </div>
 
-          {/* Supported file types */}
           {!disabled && !isDragActive && (
             <div className="text-xs text-gray-400">
               <p className="font-medium mb-1">Supported formats:</p>
               <p className="leading-relaxed">
-                Documents (PDF, DOC, DOCX, TXT), Images (JPG, PNG, GIF), 
+                Documents (PDF, DOC, DOCX, TXT), Images (JPG, PNG, GIF),
                 Spreadsheets (XLS, XLSX, CSV), Archives (ZIP), and more
               </p>
             </div>
           )}
         </div>
 
-        {/* Loading overlay when disabled */}
         {disabled && (
           <div className="absolute inset-0 bg-gray-50 bg-opacity-75 flex items-center justify-center rounded-lg">
             <svg

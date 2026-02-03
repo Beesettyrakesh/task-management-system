@@ -46,8 +46,6 @@ public class Tag {
     @ManyToMany(mappedBy = "tags")
     private Set<Task> tasks = new HashSet<>();
 
-    // ===== AUDIT FIELDS (Automatically managed by Spring) =====
-
     @CreatedDate
     @Column(name = "created_at", nullable = false,  updatable = false)
     private LocalDateTime createdAt;

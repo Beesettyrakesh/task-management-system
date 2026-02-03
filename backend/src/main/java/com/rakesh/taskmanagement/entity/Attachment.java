@@ -52,8 +52,6 @@ public class Attachment {
     @Column(nullable = false)
     @NotBlank(message = "Storage path is required")
     private String storagePath;
-
-    // ===== RELATIONSHIPS =====
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id", nullable = false)
@@ -62,8 +60,6 @@ public class Attachment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    // ===== AUDIT FIELDS =====
     
     @CreatedDate
     @Column(name = "uploaded_at", nullable = false, updatable = false)

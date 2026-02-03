@@ -56,7 +56,6 @@ public class AttachmentService {
             throw new IllegalArgumentException("File type not allowed");
         }
         
-        // Additional security: validate file extension
         if (filename == null || !isAllowedFileExtension(filename)) {
             throw new IllegalArgumentException("File extension not allowed");
         }
@@ -65,35 +64,29 @@ public class AttachmentService {
     private boolean isAllowedFileExtension(String filename) {
         String extension = filename.toLowerCase();
         
-        // Documents
         if (extension.endsWith(".pdf")) return true;
         if (extension.endsWith(".doc")) return true;
         if (extension.endsWith(".docx")) return true;
         if (extension.endsWith(".txt")) return true;
         if (extension.endsWith(".rtf")) return true;
         
-        // Images
         if (extension.endsWith(".jpg")) return true;
         if (extension.endsWith(".jpeg")) return true;
         if (extension.endsWith(".png")) return true;
         if (extension.endsWith(".gif")) return true;
         if (extension.endsWith(".webp")) return true;
         
-        // Spreadsheets
         if (extension.endsWith(".xls")) return true;
         if (extension.endsWith(".xlsx")) return true;
         if (extension.endsWith(".csv")) return true;
         
-        // Presentations
         if (extension.endsWith(".ppt")) return true;
         if (extension.endsWith(".pptx")) return true;
         
-        // Archives
         if (extension.endsWith(".zip")) return true;
         if (extension.endsWith(".rar")) return true;
         if (extension.endsWith(".7z")) return true;
         
-        // Data formats
         if (extension.endsWith(".json")) return true;
         if (extension.endsWith(".xml")) return true;
         
@@ -101,40 +94,34 @@ public class AttachmentService {
     }
 
     private boolean isAllowedContentType(String contentType) {
-        // Documents
         if (contentType.equals("application/pdf")) return true;
-        if (contentType.equals("application/msword")) return true; // DOC
-        if (contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) return true; // DOCX
-        if (contentType.equals("text/plain")) return true; // TXT
-        if (contentType.equals("application/rtf")) return true; // RTF
-        if (contentType.equals("text/rtf")) return true; // RTF alternative
+        if (contentType.equals("application/msword")) return true;
+        if (contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) return true;
+        if (contentType.equals("text/plain")) return true;
+        if (contentType.equals("application/rtf")) return true;
+        if (contentType.equals("text/rtf")) return true;
         
-        // Images
-        if (contentType.equals("image/jpeg")) return true; // JPG/JPEG
-        if (contentType.equals("image/png")) return true; // PNG
-        if (contentType.equals("image/gif")) return true; // GIF
-        if (contentType.equals("image/webp")) return true; // WEBP
+        if (contentType.equals("image/jpeg")) return true;
+        if (contentType.equals("image/png")) return true;
+        if (contentType.equals("image/gif")) return true;
+        if (contentType.equals("image/webp")) return true;
         
-        // Spreadsheets
-        if (contentType.equals("application/vnd.ms-excel")) return true; // XLS
-        if (contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) return true; // XLSX
-        if (contentType.equals("text/csv")) return true; // CSV
-        if (contentType.equals("application/csv")) return true; // CSV alternative
+        if (contentType.equals("application/vnd.ms-excel")) return true;
+        if (contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) return true;
+        if (contentType.equals("text/csv")) return true;
+        if (contentType.equals("application/csv")) return true;
         
-        // Presentations
-        if (contentType.equals("application/vnd.ms-powerpoint")) return true; // PPT
-        if (contentType.equals("application/vnd.openxmlformats-officedocument.presentationml.presentation")) return true; // PPTX
+        if (contentType.equals("application/vnd.ms-powerpoint")) return true;
+        if (contentType.equals("application/vnd.openxmlformats-officedocument.presentationml.presentation")) return true;
         
-        // Archives
-        if (contentType.equals("application/zip")) return true; // ZIP
-        if (contentType.equals("application/x-zip-compressed")) return true; // ZIP alternative
-        if (contentType.equals("application/x-rar-compressed")) return true; // RAR
-        if (contentType.equals("application/x-7z-compressed")) return true; // 7Z
+        if (contentType.equals("application/zip")) return true;
+        if (contentType.equals("application/x-zip-compressed")) return true;
+        if (contentType.equals("application/x-rar-compressed")) return true;
+        if (contentType.equals("application/x-7z-compressed")) return true;
         
-        // Data formats
-        if (contentType.equals("application/json")) return true; // JSON
-        if (contentType.equals("application/xml")) return true; // XML
-        if (contentType.equals("text/xml")) return true; // XML alternative
+        if (contentType.equals("application/json")) return true;
+        if (contentType.equals("application/xml")) return true;
+        if (contentType.equals("text/xml")) return true;
         
         return false;
     }
@@ -190,7 +177,6 @@ public class AttachmentService {
             throw new IllegalArgumentException("No files provided for upload");
         }
         
-        // Validate total upload size (50MB limit for bulk)
         long totalSize = 0;
         for (MultipartFile file : files) {
             totalSize += file.getSize();
@@ -210,12 +196,10 @@ public class AttachmentService {
 
         for (MultipartFile file : files) {
             try {
-                // Individual file validation
                 validateFile(file);
                 
                 String s3Key = generateUniqueKey(file.getOriginalFilename());
 
-                // Upload to S3
                 PutObjectRequest putRequest = PutObjectRequest.builder()
                     .bucket(bucketname)
                     .key(s3Key)
@@ -224,7 +208,6 @@ public class AttachmentService {
 
                 s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-                // Save to database
                 Attachment attachment = new Attachment();
                 attachment.setOriginalFilename(file.getOriginalFilename());
                 attachment.setFileSize(file.getSize());
@@ -245,7 +228,6 @@ public class AttachmentService {
             }
         }
 
-        // Return appropriate response based on results
         if (failedUploads.isEmpty()) {
             return BulkUploadResponseDto.success(successfulUploads);
         } else {

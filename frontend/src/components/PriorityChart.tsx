@@ -7,7 +7,7 @@ interface PriorityChartProps {
 
 const PriorityChart: React.FC<PriorityChartProps> = ({ priorityData }) => {
   const maxValue = Math.max(...Object.values(priorityData));
-  
+
   const getPriorityColor = (priority: Priority): string => {
     switch (priority) {
       case Priority.HIGH:
@@ -36,7 +36,9 @@ const PriorityChart: React.FC<PriorityChartProps> = ({ priorityData }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-900">Tasks by Priority</h3>
+      <h3 className="text-lg font-semibold mb-4 text-gray-900">
+        Tasks by Priority
+      </h3>
       <div className="space-y-4">
         {Object.entries(priorityData).map(([priority, count]) => (
           <div key={priority} className="flex items-center">
@@ -44,9 +46,11 @@ const PriorityChart: React.FC<PriorityChartProps> = ({ priorityData }) => {
               {getPriorityLabel(priority as Priority)}
             </span>
             <div className="flex-1 bg-gray-200 rounded-full h-4 ml-4 relative">
-              <div 
+              <div
                 className={`h-4 rounded-full transition-all duration-500 ${getPriorityColor(priority as Priority)}`}
-                style={{ width: `${maxValue > 0 ? (count / maxValue) * 100 : 0}%` }}
+                style={{
+                  width: `${maxValue > 0 ? (count / maxValue) * 100 : 0}%`,
+                }}
               />
             </div>
             <span className="ml-4 text-sm font-bold text-gray-900 min-w-[2rem] text-right">
@@ -55,7 +59,7 @@ const PriorityChart: React.FC<PriorityChartProps> = ({ priorityData }) => {
           </div>
         ))}
       </div>
-      
+
       {maxValue === 0 && (
         <div className="text-center text-gray-500 py-8">
           <div className="text-4xl mb-2">📊</div>

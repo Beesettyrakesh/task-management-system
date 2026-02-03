@@ -1,6 +1,6 @@
-import React from 'react';
-import { X, AlertTriangle, AlertCircle } from 'lucide-react';
-import { ButtonSpinner } from './LoadingSpinner';
+import { AlertCircle, AlertTriangle, X } from "lucide-react";
+import React from "react";
+import { ButtonSpinner } from "./LoadingSpinner";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -10,7 +10,7 @@ interface ConfirmationModalProps {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  variant?: 'danger' | 'warning';
+  variant?: "danger" | "warning";
   isLoading?: boolean;
 }
 
@@ -20,10 +20,10 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  variant = 'danger',
-  isLoading = false
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  variant = "danger",
+  isLoading = false,
 }) => {
   if (!isOpen) return null;
 
@@ -34,16 +34,16 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   const variantStyles = {
     danger: {
       icon: AlertTriangle,
-      iconColor: 'text-red-600',
-      iconBg: 'bg-red-100',
-      button: 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+      iconColor: "text-red-600",
+      iconBg: "bg-red-100",
+      button: "bg-red-600 hover:bg-red-700 focus:ring-red-500",
     },
     warning: {
       icon: AlertCircle,
-      iconColor: 'text-yellow-600',
-      iconBg: 'bg-yellow-100',
-      button: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500'
-    }
+      iconColor: "text-yellow-600",
+      iconBg: "bg-yellow-100",
+      button: "bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500",
+    },
   };
 
   const style = variantStyles[variant];
@@ -51,16 +51,13 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
         onClick={onClose}
       />
 
-      {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-          {/* Close button */}
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
@@ -69,22 +66,18 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             <X className="w-5 h-5" />
           </button>
 
-          {/* Icon */}
-          <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full ${style.iconBg} mb-4`}>
+          <div
+            className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full ${style.iconBg} mb-4`}
+          >
             <Icon className={`h-6 w-6 ${style.iconColor}`} />
           </div>
 
-          {/* Title */}
           <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
             {title}
           </h3>
 
-          {/* Message */}
-          <p className="text-sm text-gray-600 text-center mb-6">
-            {message}
-          </p>
+          <p className="text-sm text-gray-600 text-center mb-6">{message}</p>
 
-          {/* Actions */}
           <div className="flex gap-3">
             <button
               onClick={onClose}

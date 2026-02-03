@@ -39,11 +39,9 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
         Instant startTime = Instant.now();
         String requestId = UUID.randomUUID().toString().substring(0, 8);
         
-        // Store timing and tracking info
         request.setAttribute(START_TIME_ATTRIBUTE, startTime);
         request.setAttribute(REQUEST_ID_ATTRIBUTE, requestId);
         
-        // Get authenticated user info
         String username = "anonymous";
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
@@ -51,7 +49,6 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
             request.setAttribute(USER_ATTRIBUTE, username);
         }
         
-        // Log incoming request
         log.info("REQUEST [{}] {} {} - User: {} - IP: {} - User-Agent: {}", 
                  requestId,
                  request.getMethod(), 
@@ -60,7 +57,6 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
                  getClientIpAddress(request),
                  request.getHeader("User-Agent"));
                  
-        // Log query parameters if present
         if (request.getQueryString() != null) {
             log.debug("REQUEST [{}] Query Parameters: {}", requestId, request.getQueryString());
         }
@@ -74,7 +70,6 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, 
                           Object handler, ModelAndView modelAndView) {
-        // Additional processing if needed
         String requestId = (String) request.getAttribute(REQUEST_ID_ATTRIBUTE);
         log.debug("PROCESSING [{}] Controller execution completed", requestId);
     }
@@ -93,7 +88,6 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
             Duration duration = Duration.between(startTime, Instant.now());
             long executionTimeMs = duration.toMillis();
             
-            // Choose log level based on response status
             if (response.getStatus() >= 500) {
                 log.error("RESPONSE [{}] {} {} - Status: {} - Time: {}ms - User: {}", 
                          requestId, request.getMethod(), request.getRequestURI(), 
@@ -108,22 +102,19 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
                         response.getStatus(), executionTimeMs, username != null ? username : "anonymous");
             }
             
-            // Log performance warnings for slow requests
-            if (executionTimeMs > 5000) { // 5 seconds
+            if (executionTimeMs > 5000) {
                 log.warn("SLOW REQUEST [{}] {} {} took {}ms - Consider optimization", 
                         requestId, request.getMethod(), request.getRequestURI(), executionTimeMs);
-            } else if (executionTimeMs > 2000) { // 2 seconds
+            } else if (executionTimeMs > 2000) {
                 log.info("MODERATE REQUEST [{}] {} {} took {}ms", 
                         requestId, request.getMethod(), request.getRequestURI(), executionTimeMs);
             }
             
-            // Log authentication events
             if (request.getRequestURI().contains("/api/auth/")) {
                 logAuthenticationEvent(request, response, username, requestId);
             }
         }
         
-        // Log any exceptions that occurred
         if (ex != null) {
             log.error("EXCEPTION [{}] {} {} - Error: {} - User: {}", 
                      requestId, request.getMethod(), request.getRequestURI(), 

@@ -16,7 +16,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchTerm !== searchValue) {
-        console.log('🔍 Search term changed:', searchTerm);
+        console.log("🔍 Search term changed:", searchTerm);
         onSearchChange(searchTerm);
       }
     }, 500);

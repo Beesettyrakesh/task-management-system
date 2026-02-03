@@ -3,6 +3,7 @@ package com.rakesh.taskmanagement.service;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.rakesh.taskmanagement.exception.ResourceNotFoundException;
@@ -34,7 +35,8 @@ public class AttachmentService {
     private final TaskService taskService;
     private final UserService userService;
     private final AttachmentRepository attachmentRepository;
-    private final S3Client s3Client;
+    private final Optional<S3Client> s3Client;
+    private final Optional<S3Presigner> s3Presigner;
 
     @Value("${aws.s3.bucket.name}")
     private String bucketname;
@@ -148,13 +150,18 @@ public class AttachmentService {
         String s3Key = generateUniqueKey(file.getOriginalFilename());
 
         try {
+            S3Client client = s3Client
+                    .orElseThrow(() -> new IllegalStateException(
+                            "S3 is not configured. Set aws.s3.enabled=true or provide an S3Client bean."
+                    ));
+
             PutObjectRequest putRequest = PutObjectRequest.builder()
                 .bucket(bucketname)
                 .key(s3Key)
                 .contentType(file.getContentType())
                 .build();
 
-            s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
             Attachment attachment = new Attachment();
             attachment.setOriginalFilename(file.getOriginalFilename());
@@ -193,6 +200,10 @@ public class AttachmentService {
 
         List<AttachmentResponseDto> successfulUploads = new ArrayList<>();
         List<BulkUploadResponseDto.FileUploadError> failedUploads = new ArrayList<>();
+        S3Client client = s3Client
+                .orElseThrow(() -> new IllegalStateException(
+                        "S3 is not configured. Set aws.s3.enabled=true or provide an S3Client bean."
+                ));
 
         for (MultipartFile file : files) {
             try {
@@ -206,7 +217,7 @@ public class AttachmentService {
                     .contentType(file.getContentType())
                     .build();
 
-                s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+                client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
                 Attachment attachment = new Attachment();
                 attachment.setOriginalFilename(file.getOriginalFilename());
@@ -250,7 +261,20 @@ public class AttachmentService {
         Attachment attachment = attachmentRepository.findByIdAndUserId(attachmentId, currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Attachment not found"));
 
-        try (S3Presigner presigner = S3Presigner.create()){
+//        try (S3Presigner presigner = S3Presigner.create()){
+//            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+//                    .bucket(bucketname)
+//                    .key(attachment.getStoragePath())
+//                    .build();
+//
+//            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+//                    .signatureDuration(Duration.ofHours(1))
+//                    .getObjectRequest(getObjectRequest)
+//                    .build();
+//
+//            return presigner.presignGetObject(presignRequest).url().toString();
+//        }
+        if (s3Presigner.isPresent()) {
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucketname)
                     .key(attachment.getStoragePath())
@@ -261,7 +285,23 @@ public class AttachmentService {
                     .getObjectRequest(getObjectRequest)
                     .build();
 
-            return presigner.presignGetObject(presignRequest).url().toString();
+            return s3Presigner.get().presignGetObject(presignRequest).url().toString();
+        } else if (s3Client.isPresent()) {
+            try (S3Presigner presigner = S3Presigner.create()) {
+                GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                        .bucket(bucketname)
+                        .key(attachment.getStoragePath())
+                        .build();
+
+                GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                        .signatureDuration(Duration.ofHours(1))
+                        .getObjectRequest(getObjectRequest)
+                        .build();
+
+                return presigner.presignGetObject(presignRequest).url().toString();
+            }
+        } else {
+            throw new IllegalStateException("S3 is not configured. Set aws.s3.enabled=true or provide S3 client/presigner beans.");
         }
     }
 

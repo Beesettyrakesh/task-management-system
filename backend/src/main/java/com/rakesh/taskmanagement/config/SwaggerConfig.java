@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,6 +30,12 @@ public class SwaggerConfig {
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")
-                                .description("Enter JWT token (you'll get this from /api/auth/login)")));
+                                .description("Enter JWT token (you'll get this from /api/auth/login)")))
+                .addServersItem(new Server()
+                        .url("https://doqueue.ddns.net")
+                        .description("Production API Server (HTTPS)"))
+                .addServersItem(new Server()
+                        .url("http://localhost:8080")
+                        .description("Local Development Server"));
     }
 }

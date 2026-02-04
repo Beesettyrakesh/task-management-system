@@ -33,9 +33,6 @@ public class SwaggerConfig {
                                 .description("Enter JWT token (you'll get this from /api/auth/login)")))
                 .addServersItem(new Server()
                         .url("https://doqueue.ddns.net")
-                        .description("Production API Server (HTTPS)"))
-                .addServersItem(new Server()
-                        .url("http://localhost:8080")
-                        .description("Local Development Server"));
+                        .description("Production API Server (HTTPS)"));
     }
 }

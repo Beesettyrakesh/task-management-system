@@ -53,7 +53,7 @@ jobs:
           scp -i private_key.pem \
               -o StrictHostKeyChecking=no \
               backend/target/*.jar \
-              $EC2_USER@$EC2_HOST:/opt/taskmanagement/
+              $EC2_USER@$EC2_HOST:/home/ec2-user/task-management-system/backend/target/
 
           # Restart applicaiton on EC2
           ssh -i private_key.pem \

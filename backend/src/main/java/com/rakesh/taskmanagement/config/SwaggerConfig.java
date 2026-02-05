@@ -17,12 +17,10 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
-        Server httpsServer = new Server();
-        httpsServer.setUrl("https://doqueue.ddns.net");
-        httpsServer.setDescription("Production API Server (HTTPS)");
-
         return new OpenAPI()
-                .servers(List.of(httpsServer))
+                .addServersItem(new Server()
+                        .url("https://doqueue.ddns.net")
+                        .description("Production API Server (HTTPS)"))
                 .info(new Info()
                         .title("Task Management API")
                         .version("1.0.0")
@@ -39,8 +37,5 @@ public class SwaggerConfig {
                                 .scheme("bearer")
                                 .bearerFormat("JWT")
                                 .description("Enter JWT token (you'll get this from /api/auth/login)")));
-//                .addServersItem(new Server()
-//                        .url("https://doqueue.ddns.net")
-//                        .description("Production API Server (HTTPS)"));
     }
 }

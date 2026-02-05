@@ -9,7 +9,6 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableArgumentResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +38,6 @@ public class TaskService {
     private final TagService tagService;
     private final TagRepository tagRepository;
     private final EmailService emailService;
-    private final PageableArgumentResolver pageableArgumentResolver;
 
     private Task convertDtoToEntity(TaskRequestDto dto) {
         Task task = new Task();

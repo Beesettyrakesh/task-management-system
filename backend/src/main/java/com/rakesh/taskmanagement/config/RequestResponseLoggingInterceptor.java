@@ -1,17 +1,18 @@
 package com.rakesh.taskmanagement.config;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.UUID;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.UUID;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Request/Response Logging Interceptor
@@ -128,7 +129,6 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
     private void logAuthenticationEvent(HttpServletRequest request, HttpServletResponse response, 
                                       String username, String requestId) {
         String endpoint = request.getRequestURI();
-        String method = request.getMethod();
         int status = response.getStatus();
         String clientIp = getClientIpAddress(request);
         

@@ -16,11 +16,11 @@ A full-stack task management application built with Spring Boot and React, featu
 
 ## 🚀 Live Demo
 
-- **Frontend (Production):** Deployed on Vercel - [Live Application](https://task-management-system-gules.vercel.app)
-- **Backend API:** `http://52.66.219.219` (AWS EC2)
-- **API Documentation:** Swagger UI available at `/swagger-ui.html`
+- **Frontend:** [Live Application](https://doqueue.vercel.app/) (Vercel CDN)
+- **Backend API:** `https://doqueue.ddns.net` (AWS EC2 with SSL)
+- **API Documentation:** [Interactive Swagger UI](https://doqueue.ddns.net/swagger-ui.html)
 
-> **Test Account:** You can create your own account via the signup page or use the application with your own credentials.
+> **For Developers:** Test the API using the interactive Swagger UI. Click "Authorize" after logging in to test protected endpoints with your JWT token.
 
 ---
 
@@ -39,11 +39,10 @@ A full-stack task management application built with Spring Boot and React, featu
 - 🐳 **Docker Support** - Complete containerization with Docker Compose
 
 ### Technical Highlights
-- 📱 **Responsive Design** - Mobile-first approach with Tailwind CSS
 - 🔄 **Auto-refresh** - Seamless UI updates after operations
 - 🎯 **Type Safety** - Full TypeScript integration on frontend
 - 🛡️ **Security** - User data isolation, CORS configuration, input validation with Jakarta Bean Validation
-- 🚀 **Performance** - Debounced search, optimized bundle size, lazy loading, React.memo optimization
+- 🚀 **Performance** - optimized bundle size, lazy loading, React.memo optimization
 - 📝 **Professional UX** - Toast notifications, loading states, confirmation modals
 - 🧪 **Comprehensive Testing** - Unit tests with Mockito and JUnit 5
 - 🎨 **Interactive UI** - Click-to-edit status, drag-and-drop file uploads
@@ -487,40 +486,39 @@ The token is obtained from the `/api/auth/login` endpoint and stored in localSto
 
 ## 📸 Screenshots
 
-### Dashboard View
-> 🖼️ **Screenshot Placeholder** - Add your dashboard screenshot here
-> 
-> *Show: Task list, statistics cards, filter controls, create task button*
+### Login & Authentication
+*Professional authentication interface with form validation*
 
-### Task Creation Form
-> 🖼️ **Screenshot Placeholder** - Add your task creation modal screenshot here
->
-> *Show: Task form with title, description, due date, priority, status, and tag selection*
+![Login Page](screenshots/login.png)
+
+---
+
+### Dashboard Overview
+*Task management dashboard with real-time statistics and filtering*
+
+![Dashboard](screenshots/dashboard.png)
+
+---
+
+### Task Creation & Editing
+*Intuitive task form with all fields and tag selection*
+
+![Create Task](screenshots/create-task.png)
+
+---
 
 ### Task Details with Attachments
-> 🖼️ **Screenshot Placeholder** - Add your task detail modal screenshot here
->
-> *Show: Task information, tag display, attachment list, edit/delete buttons*
+*Complete task view with file management*
 
-### Tag Management
-> 🖼️ **Screenshot Placeholder** - Add your tag management section screenshot here
->
-> *Show: Tag list with colors, create/edit/delete functionality*
+![Task Details](screenshots/task-details.png)
+![Task Attachment](screenshots/task-attachment.png)
 
-### File Upload Interface
-> 🖼️ **Screenshot Placeholder** - Add your file upload interface screenshot here
->
-> *Show: Drag-and-drop area, file list, upload progress*
+---
 
-### Advanced Filtering
-> 🖼️ **Screenshot Placeholder** - Add your filtering interface screenshot here
->
-> *Show: Status filter, priority filter, sort options, search bar*
+### Interactive Swagger API Documentation
+*Professional API testing interface for developers*
 
-### Mobile Responsive View
-> 🖼️ **Screenshot Placeholder** - Add your mobile view screenshots here
->
-> *Show: Dashboard and task management on mobile devices*
+![Swagger UI](screenshots/swagger-ui.png)
 
 ---
 
@@ -552,34 +550,6 @@ For complete step-by-step deployment instructions, see:
 
 ## 🧪 Testing
 
-### Manual Testing
-
-The application has been thoroughly tested manually:
-
-1. **Authentication Flow**
-   - User registration with validation
-   - Login with JWT token generation
-   - Protected route access
-   - Session persistence
-
-2. **Task Management**
-   - Create tasks with all fields
-   - Update task status and details
-   - Delete tasks with confirmation
-   - Filter and sort operations
-
-3. **Tag System**
-   - Create tags with custom colors
-   - Assign multiple tags to tasks
-   - Filter tasks by tags
-   - Edit and delete tags
-
-4. **File Attachments**
-   - Upload single and multiple files
-   - Download attachments
-   - Delete attachments
-   - File size and type validation
-
 ### API Testing
 
 - **Tool:** Postman
@@ -590,7 +560,6 @@ The application has been thoroughly tested manually:
 
 - **Manual Testing:** All user workflows verified
 - **Browser Testing:** Chrome, Firefox, Safari, Edge
-- **Mobile Testing:** Responsive design on various screen sizes
 - **Performance:** Bundle size optimized, lazy loading implemented
 
 ---
@@ -618,7 +587,6 @@ The application has been thoroughly tested manually:
 - ✅ Code splitting with React.lazy()
 - ✅ Lazy loading routes
 - ✅ React.memo for component optimization
-- ✅ Debounced search (500ms delay)
 - ✅ Optimized bundle with Vite
 - ✅ Pagination for large datasets
 
@@ -695,19 +663,12 @@ Contributions are welcome! Here's how you can help:
 
 ---
 
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 👥 Author
 
 **Rakesh Beesetty**
 
 - GitHub: [@Beesettyrakesh](https://github.com/Beesettyrakesh)
-- LinkedIn: [Rakesh Beesetty](https://www.linkedin.com/in/your-profile)
-- Email: bssmvrakesh@gmail.com
+- Email: rakeshbeesetty53@gmail.com
 
 ---
 
@@ -747,17 +708,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Export tasks to PDF/CSV
 - [ ] Mobile app (React Native)
 - [ ] Real-time collaboration (WebSockets)
-
----
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-
-1. **Check existing documentation** in this README and deployment guides
-2. **Search for issues** in the [GitHub Issues](https://github.com/Beesettyrakesh/task-management-system/issues)
-3. **Create a new issue** with detailed information about your problem
-4. **Contact the author** via email or LinkedIn
 
 ---
 
